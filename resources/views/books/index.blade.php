@@ -1,0 +1,370 @@
+@extends('layouts.app')
+
+@section('title', 'Katalog & Manajemen Buku - Athenaeum')
+@section('page_category', 'Sirkulasi & Katalog Buku')
+
+@section('content')
+<div class="flex flex-col w-full">
+    <!-- Header Halaman & Tombol Aksi -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div>
+            <div class="flex items-center gap-1 text-[#6f7a6e] text-[11px] uppercase tracking-wider font-bold mb-1">
+                <span>Perpustakaan</span>
+                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                <span class="text-[#00652c]">Sirkulasi &amp; Katalog Buku</span>
+            </div>
+            <h1 class="font-headline text-3xl font-bold text-[#121c2a] tracking-tight">
+                Manajemen &amp; Sirkulasi Buku
+            </h1>
+            <p class="text-xs text-[#6f7a6e]">
+                Basis data terpusat koleksi eksemplar, inventaris rak, dan pencatatan sirkulasi perpustakaan.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="{{ route('books.export.csv') }}"
+               class="px-3.5 py-2 bg-white hover:bg-gray-50 text-[#121c2a] rounded-xl text-xs font-semibold border border-[#dee9fc] shadow-xs transition-all flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px] text-[#6f7a6e]">file_download</span>
+                <span>Export CSV</span>
+            </a>
+            <a href="{{ route('books.create') }}"
+               class="px-4 py-2 bg-[#15803d] hover:bg-[#00652c] text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                <span>Tambah Buku Baru</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar (Form GET) -->
+    <div class="bg-white rounded-xl p-4 border border-[#e6eeff] shadow-xs mb-6">
+        <form method="GET" action="{{ route('books.index') }}" id="filterForm" class="flex flex-col gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+                <!-- 1. Text Search Input -->
+                <div class="relative lg:col-span-2">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-[18px]">search</span>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Cari judul, ISBN, penulis, atau lokasi rak..."
+                           class="w-full pl-9 pr-4 py-2 bg-[#eff4ff]/60 border border-[#dee9fc] rounded-lg text-xs outline-none focus:border-emerald-600 focus:bg-white text-gray-900 transition-colors">
+                </div>
+
+                <!-- 2. Category Select -->
+                <div>
+                    <select name="category" onchange="document.getElementById('filterForm').submit()"
+                            class="w-full px-3 py-2 bg-[#eff4ff]/60 border border-[#dee9fc] rounded-lg text-xs outline-none focus:border-emerald-600 focus:bg-white text-gray-800 transition-colors cursor-pointer">
+                        <option value="Semua Kategori">Semua Kategori</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->name }}" {{ request('category') == $cat->name ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- 3. Status Select -->
+                <div>
+                    <select name="status" onchange="document.getElementById('filterForm').submit()"
+                            class="w-full px-3 py-2 bg-[#eff4ff]/60 border border-[#dee9fc] rounded-lg text-xs outline-none focus:border-emerald-600 focus:bg-white text-gray-800 transition-colors cursor-pointer">
+                        <option value="">Semua Status</option>
+                        <option value="Tersedia" {{ request('status') == 'Tersedia' ? 'selected' : '' }}>Tersedia (&gt; 3)</option>
+                        <option value="Stok Kritis" {{ request('status') == 'Stok Kritis' ? 'selected' : '' }}>Stok Kritis (&le; 3)</option>
+                        <option value="Habis" {{ request('status') == 'Habis' ? 'selected' : '' }}>Habis / Kosong (0)</option>
+                    </select>
+                </div>
+
+                <!-- 4. Year Select -->
+                <div>
+                    <select name="year" onchange="document.getElementById('filterForm').submit()"
+                            class="w-full px-3 py-2 bg-[#eff4ff]/60 border border-[#dee9fc] rounded-lg text-xs outline-none focus:border-emerald-600 focus:bg-white text-gray-800 transition-colors cursor-pointer">
+                        <option value="">Tahun Terbit</option>
+                        <option value="2024" {{ request('year') == '2024' ? 'selected' : '' }}>2024</option>
+                        <option value="2023" {{ request('year') == '2023' ? 'selected' : '' }}>2023</option>
+                        <option value="2020 - 2022" {{ request('year') == '2020 - 2022' ? 'selected' : '' }}>2020 - 2022</option>
+                        <option value="2010 - 2019" {{ request('year') == '2010 - 2019' ? 'selected' : '' }}>2010 - 2019</option>
+                        <option value="< 2010" {{ request('year') == '< 2010' ? 'selected' : '' }}>&lt; 2010</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-gray-100 flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500">Urutkan:</span>
+                    <select name="sort" onchange="document.getElementById('filterForm').submit()"
+                            class="px-2.5 py-1 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-700 outline-none cursor-pointer">
+                        <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terakhir Diperbarui</option>
+                        <option value="title_asc" {{ request('sort') == 'title_asc' ? 'selected' : '' }}>Judul A-Z</option>
+                        <option value="title_desc" {{ request('sort') == 'title_desc' ? 'selected' : '' }}>Judul Z-A</option>
+                        <option value="stock_desc" {{ request('sort') == 'stock_desc' ? 'selected' : '' }}>Stok Terbanyak</option>
+                        <option value="year_desc" {{ request('sort') == 'year_desc' ? 'selected' : '' }}>Tahun Terbaru</option>
+                    </select>
+
+                    @if(request()->hasAny(['search', 'category', 'status', 'year', 'sort']))
+                    <a href="{{ route('books.index') }}" class="text-xs text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1 ml-2">
+                        <span class="material-symbols-outlined text-[14px]">clear</span>
+                        <span>Reset Filter</span>
+                    </a>
+                    @endif
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-xs text-gray-500">
+                        Menampilkan <strong class="text-gray-900">{{ $books->total() }}</strong> total judul
+                    </span>
+
+                    <!-- Toggle View Mode: Table vs Grid -->
+                    <div class="flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200">
+                        <button type="button" onclick="setViewMode('table')" id="viewModeTableBtn"
+                                class="px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 bg-white text-emerald-800 shadow-xs">
+                            <span class="material-symbols-outlined text-[16px]">view_list</span>
+                            <span class="hidden sm:inline">Tabel</span>
+                        </button>
+                        <button type="button" onclick="setViewMode('grid')" id="viewModeGridBtn"
+                                class="px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 text-gray-500 hover:text-gray-900">
+                            <span class="material-symbols-outlined text-[16px]">grid_view</span>
+                            <span class="hidden sm:inline">Grid</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table View -->
+    <div id="tableViewContainer" class="bg-white rounded-xl border border-[#e6eeff] shadow-xs overflow-hidden mb-6">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-gray-50/80 border-b border-gray-200 text-gray-500 font-bold uppercase tracking-wider text-[11px]">
+                        <th class="py-3 px-4 w-12 text-center">#</th>
+                        <th class="py-3 px-4">Buku &amp; Metadata</th>
+                        <th class="py-3 px-4">Kategori</th>
+                        <th class="py-3 px-4">Penulis &amp; Penerbit</th>
+                        <th class="py-3 px-4">Lokasi Rak</th>
+                        <th class="py-3 px-4 text-center">Stok Fisik</th>
+                        <th class="py-3 px-4 text-center">Status</th>
+                        <th class="py-3 px-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-gray-700">
+                    @forelse($books as $book)
+                    <tr class="hover:bg-gray-50/60 transition-colors">
+                        <td class="py-3 px-4 text-center font-mono text-gray-400">
+                            {{ $loop->iteration + ($books->currentPage() - 1) * $books->perPage() }}
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-3">
+                                <img src="{{ $book->cover_url }}" alt="{{ $book->title }}"
+                                     class="w-10 h-14 object-cover rounded-md shadow-2xs border border-gray-100 flex-shrink-0 cursor-pointer"
+                                     onclick="openBookDetailModal({{ $book->id }})">
+                                <div class="flex flex-col">
+                                    <button type="button" onclick="openBookDetailModal({{ $book->id }})"
+                                            class="font-headline font-bold text-gray-900 hover:text-emerald-700 text-sm line-clamp-1 text-left cursor-pointer"
+                                            title="{{ $book->title }}">
+                                        {{ $book->title }}
+                                    </button>
+                                    @if($book->subtitle)
+                                    <span class="text-[11px] text-gray-400 italic line-clamp-1 max-w-xs">{{ $book->subtitle }}</span>
+                                    @endif
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-[10px] text-gray-500 font-mono bg-gray-100 px-1.5 py-0.5 rounded">
+                                            {{ $book->isbn }}
+                                        </span>
+                                        <span class="text-[10px] text-gray-400">Tahun {{ $book->year }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#eff4ff] text-[#00652c] border border-[#dee9fc]">
+                                {{ $book->category }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex flex-col">
+                                <span class="font-medium text-gray-900">{{ $book->author }}</span>
+                                <span class="text-[11px] text-gray-400">{{ $book->publisher }}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md">
+                                <span class="material-symbols-outlined text-[14px] text-gray-400">shelves</span>
+                                {{ $book->shelf_location }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="inline-flex items-center gap-1">
+                                <form method="POST" action="{{ route('books.stock', $book) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" name="delta" value="-1"
+                                            class="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center transition-colors text-xs"
+                                            title="Kurangi Stok (-1)">
+                                        -
+                                    </button>
+                                </form>
+                                <span class="font-bold text-gray-900 px-1 text-sm min-w-[20px]">{{ $book->stock }}</span>
+                                <form method="POST" action="{{ route('books.stock', $book) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" name="delta" value="1"
+                                            class="w-6 h-6 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold flex items-center justify-center transition-colors text-xs"
+                                            title="Tambah Stok (+1)">
+                                        +
+                                    </button>
+                                </form>
+                            </div>
+                            <span class="text-[10px] text-gray-400 block mt-0.5">/ {{ $book->total_copies }} eks</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            @if($book->status === 'Tersedia')
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                                    Tersedia
+                                </span>
+                            @elseif($book->status === 'Stok Kritis')
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
+                                    Stok Kritis
+                                </span>
+                            @else
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">
+                                    Habis
+                                </span>
+                            @endif
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <!-- Detail Modal -->
+                                <button type="button" onclick="openBookDetailModal({{ $book->id }})"
+                                        class="p-1.5 rounded-lg text-gray-500 hover:text-emerald-700 hover:bg-[#eff4ff] transition-colors"
+                                        title="Lihat Detail">
+                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                </button>
+                                <!-- Edit Page -->
+                                <a href="{{ route('books.edit', $book) }}"
+                                   class="p-1.5 rounded-lg text-gray-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                   title="Edit Buku">
+                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                </a>
+                                <!-- Delete Button -->
+                                <button type="button"
+                                        onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')"
+                                        class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
+                                        title="Hapus Buku">
+                                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="py-12 text-center text-gray-500">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-4xl text-gray-300">menu_book</span>
+                                <span class="font-semibold text-gray-700">Tidak ada buku yang sesuai dengan pencarian atau filter.</span>
+                                <a href="{{ route('books.index') }}" class="text-xs text-emerald-700 hover:underline">
+                                    Reset Semua Filter
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Grid View (Hidden by default, toggled via JS) -->
+    <div id="gridViewContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-6">
+        @foreach($books as $book)
+        <div class="bg-white rounded-xl border border-[#e6eeff] p-4 flex flex-col justify-between hover:shadow-md transition-shadow group">
+            <div>
+                <div class="relative overflow-hidden rounded-lg aspect-[3/4] mb-3 bg-gray-100">
+                    <img src="{{ $book->cover_url }}" alt="{{ $book->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="absolute top-2 right-2">
+                        @if($book->status === 'Tersedia')
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-xs">Tersedia</span>
+                        @elseif($book->status === 'Stok Kritis')
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-white shadow-xs">Stok Kritis</span>
+                        @else
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-600 text-white shadow-xs">Habis</span>
+                        @endif
+                    </div>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block mb-0.5">{{ $book->category }}</span>
+                <h3 class="font-headline font-bold text-sm text-gray-900 line-clamp-1" title="{{ $book->title }}">{{ $book->title }}</h3>
+                <p class="text-xs text-gray-500 line-clamp-1 mb-2">{{ $book->author }} • {{ $book->year }}</p>
+
+                <div class="flex items-center justify-between text-xs text-gray-600 bg-gray-50 p-2 rounded-lg border border-gray-100">
+                    <span class="flex items-center gap-1 text-[11px]">
+                        <span class="material-symbols-outlined text-[14px] text-gray-400">shelves</span>
+                        {{ $book->shelf_location }}
+                    </span>
+                    <span class="font-bold text-emerald-700 text-xs">
+                        Stok: {{ $book->stock }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 pt-3 mt-3 border-t border-gray-100">
+                <button type="button" onclick="openBookDetailModal({{ $book->id }})" class="flex-1 py-1.5 bg-[#eff4ff] hover:bg-emerald-700 hover:text-white text-emerald-800 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                    <span>Detail</span>
+                </button>
+                <a href="{{ route('books.edit', $book) }}" class="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors" title="Edit Buku">
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                </a>
+                <button type="button" onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')" class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors" title="Hapus Buku">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    <!-- Pagination Links -->
+    <div class="flex items-center justify-between flex-wrap gap-4 pt-2">
+        <div class="text-xs text-gray-500">
+            Halaman <strong class="text-gray-900">{{ $books->currentPage() }}</strong> dari <strong class="text-gray-900">{{ $books->lastPage() }}</strong>
+        </div>
+
+        <div class="flex items-center gap-1">
+            @if ($books->onFirstPage())
+                <span class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 bg-gray-100 cursor-not-allowed">← Sebelumnya</span>
+            @else
+                <a href="{{ $books->previousPageUrl() }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 shadow-xs transition-colors">← Sebelumnya</a>
+            @endif
+
+            @foreach ($books->getUrlRange(max(1, $books->currentPage() - 2), min($books->lastPage(), $books->currentPage() + 2)) as $page => $url)
+                @if ($page == $books->currentPage())
+                    <span class="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-emerald-700 shadow-xs">{{ $page }}</span>
+                @else
+                    <a href="{{ $url }}" class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 transition-colors">{{ $page }}</a>
+                @endif
+            @endforeach
+
+            @if ($books->hasMorePages())
+                <a href="{{ $books->nextPageUrl() }}" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 shadow-xs transition-colors">Berikutnya →</a>
+            @else
+                <span class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 bg-gray-100 cursor-not-allowed">Berikutnya →</span>
+            @endif
+        </div>
+    </div>
+</div>
+
+<script>
+    function setViewMode(mode) {
+        const tableContainer = document.getElementById('tableViewContainer');
+        const gridContainer = document.getElementById('gridViewContainer');
+        const tableBtn = document.getElementById('viewModeTableBtn');
+        const gridBtn = document.getElementById('viewModeGridBtn');
+
+        if (mode === 'grid') {
+            tableContainer.classList.add('hidden');
+            gridContainer.classList.remove('hidden');
+            gridBtn.className = "px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 bg-white text-emerald-800 shadow-xs";
+            tableBtn.className = "px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 text-gray-500 hover:text-gray-900";
+        } else {
+            tableContainer.classList.remove('hidden');
+            gridContainer.classList.add('hidden');
+            tableBtn.className = "px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 bg-white text-emerald-800 shadow-xs";
+            gridBtn.className = "px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 text-gray-500 hover:text-gray-900";
+        }
+    }
+</script>
+@endsection
