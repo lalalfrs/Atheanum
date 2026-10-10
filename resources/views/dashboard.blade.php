@@ -14,66 +14,106 @@
 <div class="flex flex-col w-full gap-8">
 
     {{-- ─────────────────────────────────────────────────────────────────
-         HEADER: Judul halaman + tanggal hari ini
-         now()->translatedFormat() menggunakan locale dari config/app.php
+         HERO / LANDING BANNER: Suasana Klasik Perpustakaan Athenaeum
+         Background image arsitektur perpustakaan klasik + deep scholarly overlay
+         Semua tombol & fungsionalitas UX dipertahankan 100%
     ───────────────────────────────────────────────────────────────────── --}}
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-        <div>
-            <h1 class="font-headline text-2xl font-bold text-[#121c2a] tracking-tight">
-                Dashboard Perpustakaan
-            </h1>
-            <p class="text-sm text-[#6f7a6e] mt-0.5">
-                Ringkasan koleksi dan stok fisik · basis data <span class="font-semibold text-emerald-700">SQLite via Eloquent</span>
-            </p>
+    <div class="relative overflow-hidden rounded-2xl border border-[#00652c]/30 shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-[#042f1a] text-white">
+        <!-- Background Image Arsitektur Perpustakaan Klasik -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1507842229450-7977a4966ad5?auto=format&fit=crop&w=1920&q=80"
+                 alt="Athenaeum Library Classical Interior"
+                 class="w-full h-full object-cover object-center filter brightness-[0.75] contrast-[1.1] scale-105 transition-transform duration-1000 ease-out hover:scale-100">
+            <!-- Layered Gradient Overlay untuk kontras maksimal & nuansa Emerald Khas Athenaeum -->
+            <div class="absolute inset-0 bg-gradient-to-r from-[#032514]/95 via-[#064321]/85 to-[#0b1c2e]/90 mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#021d10] via-transparent to-transparent opacity-90"></div>
         </div>
-        <div class="flex items-center gap-1.5 text-xs text-[#6f7a6e] font-medium bg-white border border-[#e6eeff] rounded-lg px-3 py-1.5 self-start sm:self-auto">
-            <span class="material-symbols-outlined text-[16px]">calendar_today</span>
-            <span>{{ now()->translatedFormat('l, d F Y') }}</span>
+
+        <!-- Foreground Content -->
+        <div class="relative z-10 p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-6">
+            <!-- Top Bar: Badge & Tanggal -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-emerald-200 text-xs font-semibold w-max">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="tracking-wide">Athenaeum Scholarly Catalog · DDC System</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-emerald-100/90 font-medium bg-black/25 backdrop-blur-md border border-white/10 rounded-xl px-3 py-1.5 self-start sm:self-auto">
+                    <span class="material-symbols-outlined text-[16px] text-emerald-300">calendar_today</span>
+                    <span>{{ now()->translatedFormat('l, d F Y') }}</span>
+                </div>
+            </div>
+
+            <!-- Headline & Deskripsi -->
+            <div class="max-w-3xl">
+                <h1 class="font-headline text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                    Sistem Repositori &amp; Katalog <span class="text-emerald-300 drop-shadow-sm">Athenaeum</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-emerald-100/90 mt-2 leading-relaxed max-w-2xl">
+                    Pusat katalogisasi buku ilmiah, klasifikasi Dewey Decimal (DDC), pemantauan audit rak fisik, serta manajemen sirkulasi perpustakaan berbasis basis data <span class="text-white font-semibold underline decoration-emerald-400 underline-offset-2">SQLite via Eloquent ORM</span>.
+                </p>
+            </div>
+
+            <!-- Toolbar Aksi Utama & Mini Stat Highlights -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-4 border-t border-white/15">
+                {{-- Action Buttons --}}
+                <div class="flex flex-wrap items-center gap-2.5">
+                    {{-- Tombol utama: tambah buku --}}
+                    <a href="{{ route('books.create') }}"
+                       class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#15803d] hover:bg-[#16a34a] text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-150 active:scale-95 border border-emerald-400/30">
+                        <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                        <span>Tambah Buku</span>
+                    </a>
+
+                    {{-- Export CSV --}}
+                    <a href="{{ route('books.export.csv') }}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-semibold rounded-xl border border-white/20 transition-all shadow-xs">
+                        <span class="material-symbols-outlined text-[17px] text-emerald-200">file_download</span>
+                        <span>Export CSV</span>
+                    </a>
+
+                    {{-- Export SQL Dump --}}
+                    <a href="{{ route('books.export.sql') }}"
+                       class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-semibold rounded-xl border border-white/20 transition-all shadow-xs">
+                        <span class="material-symbols-outlined text-[17px] text-emerald-200">database</span>
+                        <span>Export SQL</span>
+                    </a>
+
+                    {{-- Barcode scanner demo --}}
+                    <button type="button" onclick="showScanAlert()"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-semibold rounded-xl border border-white/20 transition-all shadow-xs cursor-pointer">
+                        <span class="material-symbols-outlined text-[17px] text-emerald-200">qr_code_scanner</span>
+                        <span>Pindai ISBN</span>
+                    </button>
+                </div>
+
+                {{-- Live Quick Stat Chips --}}
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-xl border border-white/10 text-xs">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        <span class="text-emerald-100/80">Koleksi:</span>
+                        <strong class="text-white">{{ $stats['total_books'] }} Judul</strong>
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-xl border border-white/10 text-xs">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span class="text-blue-100/80">Fisik:</span>
+                        <strong class="text-white">{{ $stats['total_physical_stock'] }} Eks</strong>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-
-    {{-- ─────────────────────────────────────────────────────────────────
-         TOOLBAR: Aksi utama
-    ───────────────────────────────────────────────────────────────────── --}}
-    <div class="flex flex-wrap items-center gap-2">
-        {{-- Tombol utama: tambah buku --}}
-        <a href="{{ route('books.create') }}"
-           class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#15803d] hover:bg-[#00652c] text-white font-semibold text-sm rounded-lg shadow-sm transition-colors duration-150 active:scale-95">
-            <span class="material-symbols-outlined text-[18px]">add</span>
-            Tambah Buku
-        </a>
-
-        {{-- Export CSV — trigger Eloquent query di BookController@exportCsv --}}
-        <a href="{{ route('books.export.csv') }}"
-           class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-gray-50 text-[#121c2a] text-xs font-semibold rounded-lg border border-[#e6eeff] transition-colors">
-            <span class="material-symbols-outlined text-[17px] text-[#6f7a6e]">file_download</span>
-            Export CSV
-        </a>
-
-        {{-- Export SQL Dump dari SQLite --}}
-        <a href="{{ route('books.export.sql') }}"
-           class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-gray-50 text-[#121c2a] text-xs font-semibold rounded-lg border border-[#e6eeff] transition-colors">
-            <span class="material-symbols-outlined text-[17px] text-[#6f7a6e]">database</span>
-            Export SQL
-        </a>
-
-        {{-- Barcode scanner (UI demo, tidak ada backend) --}}
-        <button type="button" onclick="showScanAlert()"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-gray-50 text-[#121c2a] text-xs font-semibold rounded-lg border border-[#e6eeff] transition-colors">
-            <span class="material-symbols-outlined text-[17px] text-[#6f7a6e]">qr_code_scanner</span>
-            Pindai ISBN
-        </button>
     </div>
 
     {{-- Notifikasi barcode (tersembunyi, muncul saat tombol di atas diklik) --}}
     <div id="scanBarcodeAlert"
-         class="hidden -mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center justify-between text-xs">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-[18px]">qr_code</span>
-            <span>Pemindai barcode aktif — siap membaca kode ISBN kartu sirkulasi.</span>
+         class="hidden -mt-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center justify-between text-xs shadow-sm">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-[18px]">qr_code</span>
+            </div>
+            <span><strong>Pemindai Barcode Siap:</strong> Arahkan scanner optik ke barcode ISBN pada kartu sirkulasi buku fisik.</span>
         </div>
         <button onclick="document.getElementById('scanBarcodeAlert').classList.add('hidden')"
-                class="text-emerald-700 hover:text-emerald-900 ml-4">✕</button>
+                class="text-emerald-700 hover:text-emerald-900 p-1 font-bold">✕</button>
     </div>
 
     {{-- ─────────────────────────────────────────────────────────────────

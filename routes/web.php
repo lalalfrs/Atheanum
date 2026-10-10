@@ -14,8 +14,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Dashboard
+// Dashboard & Landing Showcase
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::view('/welcome', 'welcome')->name('welcome');
 
 // Books Resource & Catalog CRUD
 Route::get('/books', [BookController::class, 'index'])->name('books.index');

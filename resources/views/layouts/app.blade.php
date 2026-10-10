@@ -61,17 +61,64 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* Sidebar collapse & drawer transitions */
+        #appSidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mainWrapper, #appHeader {
+            transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Desktop Collapse Behavior */
+        @media (min-width: 1024px) {
+            body.sidebar-collapsed #appSidebar {
+                transform: translateX(-100%);
+            }
+            body.sidebar-collapsed #mainWrapper {
+                padding-left: 0 !important;
+            }
+            body.sidebar-collapsed #appHeader {
+                left: 0 !important;
+            }
+        }
+
+        /* Mobile Drawer Behavior */
+        @media (max-width: 1023px) {
+            #appSidebar {
+                transform: translateX(-100%);
+            }
+            body.sidebar-mobile-open #appSidebar {
+                transform: translateX(0);
+            }
+            #mainWrapper {
+                padding-left: 0 !important;
+            }
+            #appHeader {
+                left: 0 !important;
+            }
+        }
     </style>
+    <script>
+        // Check saved sidebar preference before paint
+        if (window.innerWidth >= 1024 && localStorage.getItem('athenaeum_sidebar_collapsed') === 'true') {
+            document.documentElement.classList.add('sidebar-collapsed-pending');
+        }
+    </script>
 </head>
 <body class="bg-[#f8f9ff] text-[#121c2a] font-sans antialiased min-h-screen">
+    <!-- Mobile Backdrop -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar(false)"
+         class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity duration-300"></div>
+
     <div class="min-h-screen flex">
         <!-- Sidebar Navigation -->
-        <aside class="fixed left-0 top-0 h-screen w-64 bg-white flex flex-col justify-between z-50 shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-r border-[#e6eeff]">
+        <aside id="appSidebar" class="fixed left-0 top-0 h-screen w-64 bg-white flex flex-col justify-between z-50 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-r border-[#e6eeff]">
             <div class="flex flex-col">
                 <!-- Brand Header -->
-                <div class="h-16 px-4 flex items-center gap-2.5 border-b border-[#f1f5f9]">
+                <div class="h-16 px-4 flex items-center justify-between border-b border-[#f1f5f9]">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
-                        <div class="w-9 h-9 rounded-xl bg-[#15803d] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#15803d] to-[#00652c] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                             <span class="material-symbols-outlined text-[20px]">local_library</span>
                         </div>
                         <div class="flex flex-col">
@@ -83,6 +130,13 @@
                             </span>
                         </div>
                     </a>
+
+                    <!-- Sidebar Hide / Collapse Button -->
+                    <button type="button" onclick="toggleSidebar()"
+                            title="Sembunyikan Sidebar (Ctrl+B)"
+                            class="w-8 h-8 rounded-lg text-[#6f7a6e] hover:text-[#121c2a] hover:bg-[#eff4ff] flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">keyboard_double_arrow_left</span>
+                    </button>
                 </div>
 
                 <!-- Navigation Section Title -->
@@ -182,14 +236,22 @@
         </aside>
 
         <!-- Main Wrapper -->
-        <div class="pl-64 flex flex-col flex-1 min-h-screen">
+        <div id="mainWrapper" class="lg:pl-64 pl-0 flex flex-col flex-1 min-h-screen">
             <!-- Sticky Top Header -->
-            <header class="fixed top-0 left-64 right-0 h-16 bg-white/95 backdrop-blur-xl z-40 border-b border-[#e6eeff] px-8 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
-                <div class="flex items-center gap-4">
+            <header id="appHeader" class="fixed top-0 lg:left-64 left-0 right-0 h-16 bg-white/95 backdrop-blur-xl z-40 border-b border-[#e6eeff] px-4 sm:px-8 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+                <div class="flex items-center gap-3">
+                    <!-- Toggle Sidebar Button (Show / Hide) -->
+                    <button id="sidebarToggleBtn" type="button" onclick="toggleSidebar()"
+                            title="Tampilkan / Sembunyikan Sidebar (Ctrl+B)"
+                            aria-label="Toggle Sidebar"
+                            class="p-2 rounded-xl text-[#3f493f] hover:text-[#121c2a] hover:bg-[#eff4ff] border border-[#e6eeff] transition-all flex items-center justify-center">
+                        <span id="sidebarToggleIcon" class="material-symbols-outlined text-[20px]">menu_open</span>
+                    </button>
+
                     <div class="flex items-center gap-1.5 text-[#3f493f] text-sm">
-                        <span class="font-semibold text-[#121c2a]">Athenaeum</span>
-                        <span class="material-symbols-outlined text-[16px] text-[#6f7a6e]">chevron_right</span>
-                        <span class="text-[#6f7a6e] font-medium">@yield('page_category', 'Katalog Perpustakaan')</span>
+                        <span class="font-semibold text-[#121c2a] hidden sm:inline">Athenaeum</span>
+                        <span class="material-symbols-outlined text-[16px] text-[#6f7a6e] hidden sm:inline">chevron_right</span>
+                        <span class="text-[#6f7a6e] font-medium text-xs sm:text-sm">@yield('page_category', 'Katalog Perpustakaan')</span>
                     </div>
                     <div class="h-4 w-px bg-[#d9e3f6] hidden md:block"></div>
                     <div class="hidden md:flex items-center gap-1.5 text-[#6f7a6e] text-xs font-medium">
@@ -198,7 +260,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3">
                     <!-- Blade App UI vs Laravel Studio Toggle -->
                     <div class="hidden xl:flex items-center bg-[#eff4ff] p-1 rounded-xl border border-[#dee9fc]">
                         <a href="{{ route('books.index') }}"
@@ -243,7 +305,7 @@
 
                     <!-- User profile badge -->
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-[#00652c] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#15803d] to-[#00652c] text-white flex items-center justify-center font-bold text-xs shadow-sm">
                             DP
                         </div>
                         <div class="hidden sm:flex flex-col text-left">
@@ -381,16 +443,90 @@
 
     <!-- Global JavaScript Helper Functions -->
     <script>
-        // Keyboard Shortcut ⌘K / Ctrl+K
+        // Sidebar Toggle & Persistence Logic
+        function initSidebarState() {
+            const isDesktop = window.innerWidth >= 1024;
+            const savedCollapsed = localStorage.getItem('athenaeum_sidebar_collapsed') === 'true';
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
+
+            if (isDesktop && savedCollapsed) {
+                document.body.classList.add('sidebar-collapsed');
+                if (toggleIcon) toggleIcon.textContent = 'menu';
+            } else if (isDesktop) {
+                document.body.classList.remove('sidebar-collapsed');
+                if (toggleIcon) toggleIcon.textContent = 'menu_open';
+            } else {
+                // On mobile, start closed
+                document.body.classList.remove('sidebar-mobile-open');
+                if (toggleIcon) toggleIcon.textContent = 'menu';
+            }
+        }
+
+        function toggleSidebar(forceState) {
+            const isDesktop = window.innerWidth >= 1024;
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            if (isDesktop) {
+                // Desktop collapse / pull out
+                const isCurrentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
+                const willCollapse = forceState !== undefined ? forceState : !isCurrentlyCollapsed;
+
+                if (willCollapse) {
+                    document.body.classList.add('sidebar-collapsed');
+                    localStorage.setItem('athenaeum_sidebar_collapsed', 'true');
+                    if (toggleIcon) toggleIcon.textContent = 'menu';
+                } else {
+                    document.body.classList.remove('sidebar-collapsed');
+                    localStorage.setItem('athenaeum_sidebar_collapsed', 'false');
+                    if (toggleIcon) toggleIcon.textContent = 'menu_open';
+                }
+            } else {
+                // Mobile slide drawer
+                const isOpen = document.body.classList.contains('sidebar-mobile-open');
+                const willOpen = forceState !== undefined ? forceState : !isOpen;
+
+                if (willOpen) {
+                    document.body.classList.add('sidebar-mobile-open');
+                    if (backdrop) backdrop.classList.remove('hidden');
+                    if (toggleIcon) toggleIcon.textContent = 'close';
+                } else {
+                    document.body.classList.remove('sidebar-mobile-open');
+                    if (backdrop) backdrop.classList.add('hidden');
+                    if (toggleIcon) toggleIcon.textContent = 'menu';
+                }
+            }
+        }
+
+        // Initialize state on page load and window resize
+        document.addEventListener('DOMContentLoaded', initSidebarState);
+        window.addEventListener('resize', function() {
+            const isDesktop = window.innerWidth >= 1024;
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (isDesktop && backdrop) {
+                backdrop.classList.add('hidden');
+                document.body.classList.remove('sidebar-mobile-open');
+                initSidebarState();
+            }
+        });
+
+        // Keyboard Shortcut ⌘K / Ctrl+K and ⌘B / Ctrl+B
         document.addEventListener('keydown', function(e) {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 openGlobalSearch();
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                toggleSidebar();
             }
             if (e.key === 'Escape') {
                 closeGlobalSearch();
                 closeDeleteModal();
                 closeDetailModal();
+                if (window.innerWidth < 1024) {
+                    toggleSidebar(false);
+                }
             }
         });
 
