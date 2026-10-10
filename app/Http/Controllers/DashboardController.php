@@ -4,70 +4,58 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Loan;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     /**
-     * Display the Athenaeum Library Dashboard.
-     *
-     * Semua data diambil dari SQLite via Eloquent ORM —
-     * tidak ada raw SQL query di sini, semuanya lewat Model.
-     *
-     * File database SQLite ada di: database/database.sqlite
-     * Buka dengan: DB Browser for SQLite → Open Database → pilih file itu.
+     * Tampilkan Dashboard Sistem Perpustakaan Athenaeum yang adaptif berdasarkan peran pengguna.
      */
-    public function index()
+    public function index(Request $request): View
     {
-        // ┌─────────────────────────────────────────────────────────────┐
-        // │  ELOQUENT: Book::orderBy()->get()                           │
-        // │  SQL yang dijalankan di belakang layar:                     │
-        // │  SELECT * FROM books ORDER BY updated_at DESC               │
-        // │  (file: database/database.sqlite → tabel: books)            │
-        // └─────────────────────────────────────────────────────────────┘
+        /** @var User|null $user */
+        $user = $request->user();
+
         $books = Book::orderBy('updated_at', 'desc')->get();
 
-        // ┌─────────────────────────────────────────────────────────────┐
-        // │  ELOQUENT COLLECTION METHODS                                │
-        // │  $books sudah di-load ke memori (Collection PHP),           │
-        // │  jadi ->count(), ->sum(), ->where() di bawah ini            │
-        // │  TIDAK menyentuh database lagi — murni PHP di server.       │
-        // └─────────────────────────────────────────────────────────────┘
         $stats = [
-            // Jumlah total baris di tabel books
             'total_books' => $books->count(),
-
-            // SUM(total_copies) dari Collection (bukan SQL SUM)
             'total_physical_stock' => $books->sum('total_copies'),
-
-            // SUM(stock) — stok yang masih ada di rak
             'total_available_stock' => $books->sum('stock'),
-
-            // Filter koleksi di memori berdasarkan kolom status
             'critical_books_count' => $books->where('status', 'Stok Kritis')->count(),
             'out_of_stock_count' => $books->where('status', 'Habis')->count(),
-
-            // ┌─────────────────────────────────────────────────────────┐
-            // │  ELOQUENT: Category::count()                            │
-            // │  SQL: SELECT COUNT(*) FROM categories                   │
-            // └─────────────────────────────────────────────────────────┘
             'total_categories' => Category::count(),
+            'total_ebooks' => Book::where('is_ebook', true)->count(),
         ];
 
-        // 4 buku terbaru untuk ditampilkan di kartu dashboard
-        // ->take() hanya mengambil N item dari Collection, bukan SQL LIMIT
         $recentBooks = $books->take(4);
-
-        // ┌─────────────────────────────────────────────────────────────┐
-        // │  ELOQUENT: Category::withCount('books')->get()              │
-        // │  SQL: SELECT categories.*,                                  │
-        // │         COUNT(books.id) AS books_count                      │
-        // │       FROM categories                                       │
-        // │       LEFT JOIN books ON books.category_id = categories.id  │
-        // │       GROUP BY categories.id                                │
-        // │  Relationship didefinisikan di: app/Models/Category.php     │
-        // └─────────────────────────────────────────────────────────────┘
         $categories = Category::withCount('books')->get();
 
-        return view('dashboard', compact('books', 'stats', 'recentBooks', 'categories'));
+        // Data spesifik pengguna anggota (peminjaman aktif mereka)
+        $memberLoans = $user ? $user->loans()->with('book')->where('status', 'dipinjam')->get() : collect();
+
+        // Koleksi e-book rekomendasi untuk dibaca
+        $featuredEbooks = Book::where('is_ebook', true)->take(4)->get();
+
+        // Data statistik pengguna untuk Super Admin
+        $userStats = [
+            'total_users' => User::count(),
+            'members' => User::where('role', 'member')->count(),
+            'librarians' => User::where('role', 'librarian')->count(),
+            'total_active_loans' => Loan::where('status', 'dipinjam')->count(),
+        ];
+
+        return view('dashboard', compact(
+            'books',
+            'stats',
+            'recentBooks',
+            'categories',
+            'memberLoans',
+            'featuredEbooks',
+            'userStats'
+        ));
     }
 }

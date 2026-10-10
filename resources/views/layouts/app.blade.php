@@ -61,17 +61,64 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+
+        /* Sidebar collapse & drawer transitions */
+        #appSidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mainWrapper, #appHeader {
+            transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Desktop Collapse Behavior */
+        @media (min-width: 1024px) {
+            body.sidebar-collapsed #appSidebar {
+                transform: translateX(-100%);
+            }
+            body.sidebar-collapsed #mainWrapper {
+                padding-left: 0 !important;
+            }
+            body.sidebar-collapsed #appHeader {
+                left: 0 !important;
+            }
+        }
+
+        /* Mobile Drawer Behavior */
+        @media (max-width: 1023px) {
+            #appSidebar {
+                transform: translateX(-100%);
+            }
+            body.sidebar-mobile-open #appSidebar {
+                transform: translateX(0);
+            }
+            #mainWrapper {
+                padding-left: 0 !important;
+            }
+            #appHeader {
+                left: 0 !important;
+            }
+        }
     </style>
+    <script>
+        // Check saved sidebar preference before paint
+        if (window.innerWidth >= 1024 && localStorage.getItem('athenaeum_sidebar_collapsed') === 'true') {
+            document.documentElement.classList.add('sidebar-collapsed-pending');
+        }
+    </script>
 </head>
 <body class="bg-[#f8f9ff] text-[#121c2a] font-sans antialiased min-h-screen">
+    <!-- Mobile Backdrop -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar(false)"
+         class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity duration-300"></div>
+
     <div class="min-h-screen flex">
         <!-- Sidebar Navigation -->
-        <aside class="fixed left-0 top-0 h-screen w-64 bg-white flex flex-col justify-between z-50 shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-r border-[#e6eeff]">
+        <aside id="appSidebar" class="fixed left-0 top-0 h-screen w-64 bg-white flex flex-col justify-between z-50 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-r border-[#e6eeff]">
             <div class="flex flex-col">
                 <!-- Brand Header -->
-                <div class="h-16 px-4 flex items-center gap-2.5 border-b border-[#f1f5f9]">
+                <div class="h-16 px-4 flex items-center justify-between border-b border-[#f1f5f9]">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
-                        <div class="w-9 h-9 rounded-xl bg-[#15803d] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#15803d] to-[#00652c] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
                             <span class="material-symbols-outlined text-[20px]">local_library</span>
                         </div>
                         <div class="flex flex-col">
@@ -83,6 +130,13 @@
                             </span>
                         </div>
                     </a>
+
+                    <!-- Sidebar Hide / Collapse Button -->
+                    <button type="button" onclick="toggleSidebar()"
+                            title="Sembunyikan Sidebar (Ctrl+B)"
+                            class="w-8 h-8 rounded-lg text-[#6f7a6e] hover:text-[#121c2a] hover:bg-[#eff4ff] flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">keyboard_double_arrow_left</span>
+                    </button>
                 </div>
 
                 <!-- Navigation Section Title -->
@@ -103,19 +157,47 @@
                         </div>
                     </a>
 
-                    <!-- 2. Manajemen Buku -->
+                    <!-- 2. Katalog Koleksi / Manajemen Buku -->
                     <a href="{{ route('books.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('books.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
                             <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('books.*') ? 'text-white' : 'text-[#6f7a6e]' }}">menu_book</span>
-                            <span>Manajemen Buku</span>
+                            <span>{{ auth()->check() && auth()->user()->isLibrarian() ? 'Manajemen Buku' : 'Katalog Buku' }}</span>
                         </div>
                         <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold {{ request()->routeIs('books.*') ? 'bg-white/20 text-white' : 'bg-[#eff4ff] text-[#6f7a6e]' }}">
                             {{ \App\Models\Book::count() }}
                         </span>
                     </a>
 
-                    <!-- 3. Kategori -->
+                    <!-- 3. E-Book & Koleksi Digital -->
+                    <a href="{{ route('ebooks.index') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('ebooks.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('ebooks.*') ? 'text-white' : 'text-[#6f7a6e]' }}">auto_stories</span>
+                            <span>E-Book Digital</span>
+                        </div>
+                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-emerald-100 text-[#00652c]">
+                            Digital
+                        </span>
+                    </a>
+
+                    @auth
+                    <!-- 4. Layanan Peminjaman Buku -->
+                    <a href="{{ route('loans.index') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('loans.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('loans.*') ? 'text-white' : 'text-[#6f7a6e]' }}">assignment</span>
+                            <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Pinjaman' : 'Peminjaman Saya' }}</span>
+                        </div>
+                        @if(auth()->user()->isMember())
+                            <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold {{ request()->routeIs('loans.*') ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">
+                                {{ auth()->user()->loans()->where('status', 'dipinjam')->count() }}
+                            </span>
+                        @endif
+                    </a>
+                    @endauth
+
+                    <!-- 5. Kategori DDC -->
                     <a href="{{ route('categories.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('categories.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
@@ -127,7 +209,8 @@
                         </span>
                     </a>
 
-                    <!-- 4. Laporan Inventaris -->
+                    @if(auth()->check() && auth()->user()->isLibrarian())
+                    <!-- 6. Laporan Inventaris (Khusus Pustakawan & Super Admin) -->
                     <a href="{{ route('inventory.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('inventory.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
@@ -136,19 +219,16 @@
                         </div>
                     </a>
 
-                    <!-- 5. Laravel & Eloquent Studio -->
+                    <!-- 7. Laravel & Eloquent Studio -->
                     <a href="{{ route('laravel-studio.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('laravel-studio.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
                             <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('laravel-studio.*') ? 'text-white' : 'text-[#6f7a6e]' }}">code_blocks</span>
-                            <span>Laravel &amp; Eloquent</span>
+                            <span>Eloquent Studio</span>
                         </div>
-                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-[#d3ffd5] text-[#00652c]">
-                            Blade
-                        </span>
                     </a>
 
-                    <!-- 6. Pengaturan -->
+                    <!-- 8. Pengaturan -->
                     <a href="{{ route('settings.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('settings.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
@@ -156,6 +236,53 @@
                             <span>Pengaturan</span>
                         </div>
                     </a>
+                    @endif
+
+                    @if(auth()->check() && auth()->user()->isSuperAdmin())
+                    <!-- 9. Manajemen Pengguna (Khusus Super Admin) -->
+                    <a href="{{ route('users.index') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('users.*') ? 'bg-purple-700 text-white font-semibold shadow-sm' : 'text-purple-900 bg-purple-50/70 hover:bg-purple-100 hover:text-purple-950' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('users.*') ? 'text-white' : 'text-purple-700' }}">manage_accounts</span>
+                            <span>Manajemen User</span>
+                        </div>
+                        <span class="px-1.5 py-0.5 text-[9px] rounded-full font-bold bg-purple-200 text-purple-900">
+                            Super Admin
+                        </span>
+                    </a>
+                    @endif
+
+                    @guest
+                    <!-- Masuk Pustakawan / Anggota -->
+                    <a href="{{ route('login') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('login') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('login') ? 'text-white' : 'text-[#6f7a6e]' }}">login</span>
+                            <span>Masuk Sistem</span>
+                        </div>
+                    </a>
+
+                    <!-- Daftar Akun Baru -->
+                    <a href="{{ route('register') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('register') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('register') ? 'text-white' : 'text-[#6f7a6e]' }}">person_add</span>
+                            <span>Daftar Akun Baru</span>
+                        </div>
+                    </a>
+                    @else
+                    <!-- Keluar Sistem -->
+                    <form method="POST" action="{{ route('logout') }}" class="w-full mt-2 pt-2 border-t border-slate-100">
+                        @csrf
+                        <button type="submit"
+                                class="w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-sm text-rose-700 hover:bg-rose-50 text-left">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-[20px] text-rose-600">logout</span>
+                                <span>Keluar Sistem</span>
+                            </div>
+                        </button>
+                    </form>
+                    @endguest
                 </nav>
             </div>
 
@@ -182,14 +309,22 @@
         </aside>
 
         <!-- Main Wrapper -->
-        <div class="pl-64 flex flex-col flex-1 min-h-screen">
+        <div id="mainWrapper" class="lg:pl-64 pl-0 flex flex-col flex-1 min-h-screen">
             <!-- Sticky Top Header -->
-            <header class="fixed top-0 left-64 right-0 h-16 bg-white/95 backdrop-blur-xl z-40 border-b border-[#e6eeff] px-8 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
-                <div class="flex items-center gap-4">
+            <header id="appHeader" class="fixed top-0 lg:left-64 left-0 right-0 h-16 bg-white/95 backdrop-blur-xl z-40 border-b border-[#e6eeff] px-4 sm:px-8 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+                <div class="flex items-center gap-3">
+                    <!-- Toggle Sidebar Button (Show / Hide) -->
+                    <button id="sidebarToggleBtn" type="button" onclick="toggleSidebar()"
+                            title="Tampilkan / Sembunyikan Sidebar (Ctrl+B)"
+                            aria-label="Toggle Sidebar"
+                            class="p-2 rounded-xl text-[#3f493f] hover:text-[#121c2a] hover:bg-[#eff4ff] border border-[#e6eeff] transition-all flex items-center justify-center">
+                        <span id="sidebarToggleIcon" class="material-symbols-outlined text-[20px]">menu_open</span>
+                    </button>
+
                     <div class="flex items-center gap-1.5 text-[#3f493f] text-sm">
-                        <span class="font-semibold text-[#121c2a]">Athenaeum</span>
-                        <span class="material-symbols-outlined text-[16px] text-[#6f7a6e]">chevron_right</span>
-                        <span class="text-[#6f7a6e] font-medium">@yield('page_category', 'Katalog Perpustakaan')</span>
+                        <span class="font-semibold text-[#121c2a] hidden sm:inline">Athenaeum</span>
+                        <span class="material-symbols-outlined text-[16px] text-[#6f7a6e] hidden sm:inline">chevron_right</span>
+                        <span class="text-[#6f7a6e] font-medium text-xs sm:text-sm">@yield('page_category', 'Katalog Perpustakaan')</span>
                     </div>
                     <div class="h-4 w-px bg-[#d9e3f6] hidden md:block"></div>
                     <div class="hidden md:flex items-center gap-1.5 text-[#6f7a6e] text-xs font-medium">
@@ -198,59 +333,85 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <!-- Blade App UI vs Laravel Studio Toggle -->
-                    <div class="hidden xl:flex items-center bg-[#eff4ff] p-1 rounded-xl border border-[#dee9fc]">
-                        <a href="{{ route('books.index') }}"
-                           class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all {{ !request()->routeIs('laravel-studio.*') ? 'bg-white text-[#00652c] shadow-sm' : 'text-[#6f7a6e] hover:text-[#121c2a]' }}">
-                            <span class="material-symbols-outlined text-[16px]">web</span>
-                            <span>Blade App UI</span>
-                        </a>
-                        <a href="{{ route('laravel-studio.index') }}"
-                           class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all {{ request()->routeIs('laravel-studio.*') ? 'bg-[#15803d] text-white shadow-sm' : 'text-[#6f7a6e] hover:text-[#121c2a]' }}">
-                            <span class="material-symbols-outlined text-[16px]">code</span>
-                            <span>Laravel Eloquent Source</span>
-                        </a>
-                    </div>
-
+                <div class="flex items-center gap-2 sm:gap-3">
                     <!-- Global Search trigger button -->
                     <button type="button" onclick="openGlobalSearch()"
-                            class="flex items-center gap-2 px-3 py-1.5 bg-[#eff4ff] hover:bg-[#e6eeff] rounded-xl text-[#6f7a6e] hover:text-[#121c2a] transition-colors border border-[#dee9fc]">
+                            class="flex items-center gap-2 px-3 py-1.5 bg-[#eff4ff] hover:bg-[#e6eeff] rounded-xl text-[#6f7a6e] hover:text-[#121c2a] transition-colors border border-[#dee9fc] cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">search</span>
-                        <span class="text-xs hidden lg:inline">Cari judul, ISBN, rak...</span>
+                        <span class="text-xs hidden md:inline">Cari koleksi buku...</span>
                         <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold bg-white text-[#121c2a] rounded shadow-xs">
                             ⌘K
                         </kbd>
                     </button>
 
-                    <!-- MySQL .sql Dump Export -->
-                    <a href="{{ route('books.export.sql') }}"
-                       title="Download MySQL Dump (.sql)"
-                       class="flex items-center gap-1 px-2.5 py-1.5 bg-[#eff4ff] hover:bg-[#d9e3f6] text-[#00652c] rounded-xl text-xs font-semibold transition-colors border border-[#dee9fc]">
-                        <span class="material-symbols-outlined text-[18px]">database</span>
-                        <span class="hidden sm:inline">MySQL .sql</span>
-                    </a>
-
-                    <!-- CSV Export -->
-                    <a href="{{ route('books.export.csv') }}"
-                       title="Download Data Katalog (CSV)"
-                       class="flex items-center gap-1 px-2.5 py-1.5 bg-[#eff4ff] hover:bg-[#d9e3f6] text-[#00652c] rounded-xl text-xs font-semibold transition-colors border border-[#dee9fc]">
-                        <span class="material-symbols-outlined text-[18px]">file_download</span>
-                        <span class="hidden sm:inline">CSV</span>
-                    </a>
-
                     <div class="h-6 w-px bg-[#d9e3f6]"></div>
 
-                    <!-- User profile badge -->
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-[#00652c] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                            DP
-                        </div>
-                        <div class="hidden sm:flex flex-col text-left">
-                            <span class="text-xs font-semibold text-[#121c2a] leading-tight">Dimas Prakoso</span>
-                            <span class="text-[11px] text-[#6f7a6e] leading-tight">Head Librarian</span>
+                    <!-- User Profile / Auth State Badge -->
+                    @auth
+                    <div class="relative group">
+                        <button type="button" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#eff4ff] transition-colors focus:outline-none cursor-pointer">
+                            <div class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shadow-sm {{ auth()->user()->isSuperAdmin() ? 'bg-purple-700' : (auth()->user()->isLibrarian() ? 'bg-[#15803d]' : 'bg-slate-700') }}">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                            </div>
+                            <div class="hidden sm:flex flex-col text-left">
+                                <span class="text-xs font-semibold text-[#121c2a] leading-tight">{{ auth()->user()->name }}</span>
+                                <span class="text-[10px] font-bold leading-tight {{ auth()->user()->isSuperAdmin() ? 'text-purple-700' : (auth()->user()->isLibrarian() ? 'text-[#00652c]' : 'text-blue-700') }}">
+                                    {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isLibrarian() ? 'Pustakawan' : 'Anggota') }}
+                                </span>
+                            </div>
+                            <span class="material-symbols-outlined text-[16px] text-slate-400">expand_more</span>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 top-full mt-1 w-56 bg-white rounded-2xl shadow-xl border border-[#e6eeff] py-2 hidden group-hover:block hover:block z-50">
+                            <div class="px-3 py-2 border-b border-[#f1f5f9]">
+                                <span class="text-xs font-bold text-[#121c2a] block truncate">{{ auth()->user()->name }}</span>
+                                <span class="text-[11px] text-[#475569] block truncate font-mono">{{ auth()->user()->email }}</span>
+                                <span class="mt-1 inline-block px-2 py-0.5 rounded-md text-[9px] font-bold uppercase {{ auth()->user()->isSuperAdmin() ? 'bg-purple-100 text-purple-800' : (auth()->user()->isLibrarian() ? 'bg-emerald-100 text-[#00652c]' : 'bg-blue-100 text-blue-800') }}">
+                                    {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isLibrarian() ? 'Pustakawan' : 'Anggota / Pengunjung') }}
+                                </span>
+                            </div>
+
+                            @if(auth()->user()->isSuperAdmin())
+                            <a href="{{ route('users.index') }}" class="px-3 py-2 text-xs text-purple-800 hover:bg-purple-50 flex items-center gap-2 font-semibold transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
+                                <span>Manajemen Pengguna</span>
+                            </a>
+                            @endif
+
+                            <a href="{{ route('loans.index') }}" class="px-3 py-2 text-xs text-slate-700 hover:bg-[#eff4ff] flex items-center gap-2 font-medium transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">assignment</span>
+                                <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Peminjaman' : 'Buku Pinjaman Saya' }}</span>
+                            </a>
+
+                            <a href="{{ route('ebooks.index') }}" class="px-3 py-2 text-xs text-slate-700 hover:bg-[#eff4ff] flex items-center gap-2 font-medium transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">auto_stories</span>
+                                <span>Koleksi E-Book</span>
+                            </a>
+
+                            <div class="border-t border-[#f1f5f9] my-1"></div>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full px-3 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold transition-colors cursor-pointer">
+                                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                                    <span>Keluar (Logout)</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
+                    @else
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('login') }}" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#15803d] to-[#00652c] text-white text-xs font-semibold shadow-xs hover:shadow hover:from-[#16a34a] hover:to-[#007b36] transition-all">
+                            <span class="material-symbols-outlined text-[16px]">login</span>
+                            <span>Masuk</span>
+                        </a>
+                        <a href="{{ route('register') }}" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#00652c] bg-[#eff4ff] hover:bg-[#dee9fc] border border-[#dee9fc] transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">person_add</span>
+                            <span>Daftar</span>
+                        </a>
+                    </div>
+                    @endauth
                 </div>
             </header>
 
@@ -381,16 +542,90 @@
 
     <!-- Global JavaScript Helper Functions -->
     <script>
-        // Keyboard Shortcut ⌘K / Ctrl+K
+        // Sidebar Toggle & Persistence Logic
+        function initSidebarState() {
+            const isDesktop = window.innerWidth >= 1024;
+            const savedCollapsed = localStorage.getItem('athenaeum_sidebar_collapsed') === 'true';
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
+
+            if (isDesktop && savedCollapsed) {
+                document.body.classList.add('sidebar-collapsed');
+                if (toggleIcon) toggleIcon.textContent = 'menu';
+            } else if (isDesktop) {
+                document.body.classList.remove('sidebar-collapsed');
+                if (toggleIcon) toggleIcon.textContent = 'menu_open';
+            } else {
+                // On mobile, start closed
+                document.body.classList.remove('sidebar-mobile-open');
+                if (toggleIcon) toggleIcon.textContent = 'menu';
+            }
+        }
+
+        function toggleSidebar(forceState) {
+            const isDesktop = window.innerWidth >= 1024;
+            const toggleIcon = document.getElementById('sidebarToggleIcon');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            if (isDesktop) {
+                // Desktop collapse / pull out
+                const isCurrentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
+                const willCollapse = forceState !== undefined ? forceState : !isCurrentlyCollapsed;
+
+                if (willCollapse) {
+                    document.body.classList.add('sidebar-collapsed');
+                    localStorage.setItem('athenaeum_sidebar_collapsed', 'true');
+                    if (toggleIcon) toggleIcon.textContent = 'menu';
+                } else {
+                    document.body.classList.remove('sidebar-collapsed');
+                    localStorage.setItem('athenaeum_sidebar_collapsed', 'false');
+                    if (toggleIcon) toggleIcon.textContent = 'menu_open';
+                }
+            } else {
+                // Mobile slide drawer
+                const isOpen = document.body.classList.contains('sidebar-mobile-open');
+                const willOpen = forceState !== undefined ? forceState : !isOpen;
+
+                if (willOpen) {
+                    document.body.classList.add('sidebar-mobile-open');
+                    if (backdrop) backdrop.classList.remove('hidden');
+                    if (toggleIcon) toggleIcon.textContent = 'close';
+                } else {
+                    document.body.classList.remove('sidebar-mobile-open');
+                    if (backdrop) backdrop.classList.add('hidden');
+                    if (toggleIcon) toggleIcon.textContent = 'menu';
+                }
+            }
+        }
+
+        // Initialize state on page load and window resize
+        document.addEventListener('DOMContentLoaded', initSidebarState);
+        window.addEventListener('resize', function() {
+            const isDesktop = window.innerWidth >= 1024;
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (isDesktop && backdrop) {
+                backdrop.classList.add('hidden');
+                document.body.classList.remove('sidebar-mobile-open');
+                initSidebarState();
+            }
+        });
+
+        // Keyboard Shortcut ⌘K / Ctrl+K and ⌘B / Ctrl+B
         document.addEventListener('keydown', function(e) {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
                 openGlobalSearch();
+            }
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                toggleSidebar();
             }
             if (e.key === 'Escape') {
                 closeGlobalSearch();
                 closeDeleteModal();
                 closeDetailModal();
+                if (window.innerWidth < 1024) {
+                    toggleSidebar(false);
+                }
             }
         });
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Book extends Model
@@ -33,6 +34,9 @@ class Book extends Model
         'total_copies',
         'shelf_location',
         'status',
+        'is_ebook',
+        'ebook_pages',
+        'ebook_content',
         'cover_image',
         'image_storage_path',
         'file_size_kb',
@@ -46,10 +50,20 @@ class Book extends Model
         'year' => 'integer',
         'stock' => 'integer',
         'total_copies' => 'integer',
+        'is_ebook' => 'boolean',
+        'ebook_pages' => 'integer',
         'file_size_kb' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Relasi peminjaman buku.
+     */
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
 
     /**
      * Accessor for full cover image URL.

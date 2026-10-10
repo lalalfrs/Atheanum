@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EbookController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LaravelStudioController;
+use App\Http\Controllers\LoanController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,8 +18,18 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Dashboard
+// Autentikasi Laravel Sanctum & Sesi Pustakawan
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+});
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Dashboard & Landing Showcase
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::view('/welcome', 'welcome')->name('welcome');
 
 // Books Resource & Catalog CRUD
 Route::get('/books', [BookController::class, 'index'])->name('books.index');
@@ -36,6 +50,23 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 
 // Physical Shelf Inventory Report
 Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+
+// E-Book & Koleksi Digital (Tersedia untuk Pengunjung / Mahasiswa)
+Route::get('/ebooks', [EbookController::class, 'index'])->name('ebooks.index');
+Route::get('/ebooks/{book}', [EbookController::class, 'read'])->name('ebooks.show');
+Route::get('/ebooks/{book}/read', [EbookController::class, 'read'])->name('ebooks.read');
+
+// Rute Terproteksi Pengguna Terautentikasi
+Route::middleware('auth')->group(function () {
+    // Layanan Peminjaman Buku Fisik
+    Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
+    Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
+    Route::post('/loans/{loan}/return', [LoanController::class, 'returnBook'])->name('loans.return');
+
+    // Manajemen Pengguna & Promosi Hak Akses (Khusus Super Admin)
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::patch('/users/{user}/role', [UserManagementController::class, 'updateRole'])->name('users.role');
+});
 
 // Laravel & Eloquent Architecture Studio
 Route::get('/laravel-studio', [LaravelStudioController::class, 'index'])->name('laravel-studio.index');

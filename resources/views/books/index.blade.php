@@ -27,11 +27,26 @@
                 <span class="material-symbols-outlined text-[18px] text-[#6f7a6e]">file_download</span>
                 <span>Export CSV</span>
             </a>
-            <a href="{{ route('books.create') }}"
-               class="px-4 py-2 bg-[#15803d] hover:bg-[#00652c] text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
-                <span class="material-symbols-outlined text-[18px]">add</span>
-                <span>Tambah Buku Baru</span>
-            </a>
+            @if(auth()->check() && auth()->user()->isLibrarian())
+                <a href="{{ route('books.create') }}"
+                   class="px-4 py-2 bg-[#15803d] hover:bg-[#00652c] text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    <span>Tambah Buku Baru</span>
+                </a>
+            @else
+                <a href="{{ route('ebooks.index') }}"
+                   class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 rounded-xl text-xs font-semibold border border-indigo-200 shadow-xs transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px] text-indigo-600">devices</span>
+                    <span>Koleksi E-Book</span>
+                </a>
+                @auth
+                <a href="{{ route('loans.index') }}"
+                   class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-semibold border border-emerald-200 shadow-xs transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px] text-emerald-600">assignment_return</span>
+                    <span>Pinjaman Saya</span>
+                </a>
+                @endauth
+            @endif
         </div>
     </div>
 
@@ -191,25 +206,29 @@
                             </span>
                         </td>
                         <td class="py-3 px-4 text-center">
-                            <div class="inline-flex items-center gap-1">
-                                <form method="POST" action="{{ route('books.stock', $book) }}" class="inline">
-                                    @csrf
-                                    <button type="submit" name="delta" value="-1"
-                                            class="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center transition-colors text-xs"
-                                            title="Kurangi Stok (-1)">
-                                        -
-                                    </button>
-                                </form>
-                                <span class="font-bold text-gray-900 px-1 text-sm min-w-[20px]">{{ $book->stock }}</span>
-                                <form method="POST" action="{{ route('books.stock', $book) }}" class="inline">
-                                    @csrf
-                                    <button type="submit" name="delta" value="1"
-                                            class="w-6 h-6 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold flex items-center justify-center transition-colors text-xs"
-                                            title="Tambah Stok (+1)">
-                                        +
-                                    </button>
-                                </form>
-                            </div>
+                            @if(auth()->check() && auth()->user()->isLibrarian())
+                                <div class="inline-flex items-center gap-1">
+                                    <form method="POST" action="{{ route('books.stock', $book) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" name="delta" value="-1"
+                                                class="w-6 h-6 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold flex items-center justify-center transition-colors text-xs cursor-pointer"
+                                                title="Kurangi Stok (-1)">
+                                            -
+                                        </button>
+                                    </form>
+                                    <span class="font-bold text-gray-900 px-1 text-sm min-w-[20px]">{{ $book->stock }}</span>
+                                    <form method="POST" action="{{ route('books.stock', $book) }}" class="inline">
+                                        @csrf
+                                        <button type="submit" name="delta" value="1"
+                                                class="w-6 h-6 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold flex items-center justify-center transition-colors text-xs cursor-pointer"
+                                                title="Tambah Stok (+1)">
+                                            +
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <span class="font-bold text-gray-900 text-sm">{{ $book->stock }}</span>
+                            @endif
                             <span class="text-[10px] text-gray-400 block mt-0.5">/ {{ $book->total_copies }} eks</span>
                         </td>
                         <td class="py-3 px-4 text-center">
@@ -228,26 +247,48 @@
                             @endif
                         </td>
                         <td class="py-3 px-4 text-right">
-                            <div class="flex items-center justify-end gap-1">
+                            <div class="flex items-center justify-end gap-1.5 flex-wrap">
                                 <!-- Detail Modal -->
                                 <button type="button" onclick="openBookDetailModal({{ $book->id }})"
-                                        class="p-1.5 rounded-lg text-gray-500 hover:text-emerald-700 hover:bg-[#eff4ff] transition-colors"
+                                        class="p-1.5 rounded-lg text-gray-500 hover:text-emerald-700 hover:bg-[#eff4ff] transition-colors cursor-pointer"
                                         title="Lihat Detail">
                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 </button>
-                                <!-- Edit Page -->
-                                <a href="{{ route('books.edit', $book) }}"
-                                   class="p-1.5 rounded-lg text-gray-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
-                                   title="Edit Buku">
-                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                </a>
-                                <!-- Delete Button -->
-                                <button type="button"
-                                        onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')"
-                                        class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
-                                        title="Hapus Buku">
-                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                </button>
+
+                                @if(auth()->check() && !auth()->user()->isLibrarian() && $book->stock > 0)
+                                    <form method="POST" action="{{ route('loans.store') }}" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="book_id" value="{{ $book->id }}">
+                                        <button type="submit" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-2xs" title="Pinjam Buku Ini">
+                                            <span class="material-symbols-outlined text-[15px]">assignment_add</span>
+                                            <span>Pinjam</span>
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if($book->is_ebook)
+                                    <a href="{{ route('ebooks.show', $book) }}"
+                                       class="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 transition-colors"
+                                       title="Baca E-Book Online">
+                                        <span class="material-symbols-outlined text-[18px]">auto_stories</span>
+                                    </a>
+                                @endif
+
+                                @if(auth()->check() && auth()->user()->isLibrarian())
+                                    <!-- Edit Page -->
+                                    <a href="{{ route('books.edit', $book) }}"
+                                       class="p-1.5 rounded-lg text-gray-500 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                       title="Edit Buku">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    </a>
+                                    <!-- Delete Button -->
+                                    <button type="button"
+                                            onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')"
+                                            class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                                            title="Hapus Buku">
+                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -276,7 +317,12 @@
             <div>
                 <div class="relative overflow-hidden rounded-lg aspect-[3/4] mb-3 bg-gray-100">
                     <img src="{{ $book->cover_url }}" alt="{{ $book->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    <div class="absolute top-2 right-2">
+                    <div class="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                        @if($book->is_ebook)
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-600 text-white shadow-xs flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-[10px]">devices</span> E-Book
+                            </span>
+                        @endif
                         @if($book->status === 'Tersedia')
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-xs">Tersedia</span>
                         @elseif($book->status === 'Stok Kritis')
@@ -288,7 +334,7 @@
                 </div>
                 <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block mb-0.5">{{ $book->category }}</span>
                 <h3 class="font-headline font-bold text-sm text-gray-900 line-clamp-1" title="{{ $book->title }}">{{ $book->title }}</h3>
-                <p class="text-xs text-gray-500 line-clamp-1 mb-2">{{ $book->author }} • {{ $book->year }}</p>
+                <p class="text-xs text-gray-500 line-clamp-1 mb-2">{{ $book->author }} · {{ $book->year }}</p>
 
                 <div class="flex items-center justify-between text-xs text-gray-600 bg-gray-50 p-2 rounded-lg border border-gray-100">
                     <span class="flex items-center gap-1 text-[11px]">
@@ -301,17 +347,39 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-1.5 pt-3 mt-3 border-t border-gray-100">
-                <button type="button" onclick="openBookDetailModal({{ $book->id }})" class="flex-1 py-1.5 bg-[#eff4ff] hover:bg-emerald-700 hover:text-white text-emerald-800 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1">
+            <div class="flex items-center gap-1.5 pt-3 mt-3 border-t border-gray-100 flex-wrap">
+                <button type="button" onclick="openBookDetailModal({{ $book->id }})" class="flex-1 py-1.5 bg-[#eff4ff] hover:bg-emerald-700 hover:text-white text-emerald-800 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">visibility</span>
                     <span>Detail</span>
                 </button>
-                <a href="{{ route('books.edit', $book) }}" class="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors" title="Edit Buku">
-                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                </a>
-                <button type="button" onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')" class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors" title="Hapus Buku">
-                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                </button>
+
+                @if(auth()->check() && !auth()->user()->isLibrarian() && $book->stock > 0)
+                    <form method="POST" action="{{ route('loans.store') }}" class="inline">
+                        @csrf
+                        <input type="hidden" name="book_id" value="{{ $book->id }}">
+                        <button type="submit" class="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-2xs" title="Pinjam Buku Ini">
+                            <span class="material-symbols-outlined text-[15px]">assignment_add</span>
+                            <span>Pinjam</span>
+                        </button>
+                    </form>
+                @endif
+
+                @if($book->is_ebook)
+                    <a href="{{ route('ebooks.show', $book) }}"
+                       class="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 transition-colors"
+                       title="Baca E-Book Online">
+                        <span class="material-symbols-outlined text-[18px]">auto_stories</span>
+                    </a>
+                @endif
+
+                @if(auth()->check() && auth()->user()->isLibrarian())
+                    <a href="{{ route('books.edit', $book) }}" class="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors" title="Edit Buku">
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                    </a>
+                    <button type="button" onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')" class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer" title="Hapus Buku">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                @endif
             </div>
         </div>
         @endforeach
