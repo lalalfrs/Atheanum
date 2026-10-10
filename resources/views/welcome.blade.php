@@ -81,10 +81,17 @@
             </nav>
 
             <div class="flex items-center gap-3">
+                @guest
+                <a href="{{ route('login') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all hover:border-white/40">
+                    <span class="material-symbols-outlined text-[18px] text-emerald-300">key</span>
+                    <span>Masuk Pustakawan</span>
+                </a>
+                @endguest
                 <a href="{{ route('dashboard') }}"
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#15803d] hover:bg-[#16a34a] text-white font-semibold text-xs sm:text-sm shadow-lg hover:shadow-emerald-900/40 transition-all border border-emerald-400/30 active:scale-95">
                     <span class="material-symbols-outlined text-[18px]">dashboard</span>
-                    <span>Masuk Dashboard</span>
+                    <span>Dashboard Katalog</span>
                 </a>
             </div>
         </div>

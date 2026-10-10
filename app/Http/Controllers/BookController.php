@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -103,10 +104,24 @@ class BookController extends Controller
     }
 
     /**
+     * Pastikan pengguna memiliki hak staf pustakawan atau superadmin.
+     */
+    protected function ensureLibrarian(Request $request): void
+    {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        if (! $user || ! $user->isLibrarian()) {
+            abort(403, 'Akses terbatas: Hanya staf pustakawan yang berwenang mengelola data buku katalog.');
+        }
+    }
+
+    /**
      * Show the form for creating a new book.
      */
-    public function create()
+    public function create(Request $request)
     {
+        $this->ensureLibrarian($request);
         $categories = Category::orderBy('name')->get();
 
         return view('books.create', compact('categories'));
@@ -117,6 +132,7 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureLibrarian($request);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
@@ -189,8 +205,9 @@ class BookController extends Controller
     /**
      * Show the form for editing the specified book.
      */
-    public function edit(Book $book)
+    public function edit(Book $book, Request $request)
     {
+        $this->ensureLibrarian($request);
         $categories = Category::orderBy('name')->get();
 
         return view('books.edit', compact('book', 'categories'));
@@ -201,6 +218,7 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
+        $this->ensureLibrarian($request);
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
@@ -261,6 +279,7 @@ class BookController extends Controller
      */
     public function destroy(Book $book, Request $request)
     {
+        $this->ensureLibrarian($request);
         $title = $book->title;
         // Eloquent Delete (will trigger booted deleting hook in Book model to remove storage image)
         $book->delete();
@@ -281,6 +300,7 @@ class BookController extends Controller
      */
     public function updateStock(Request $request, Book $book)
     {
+        $this->ensureLibrarian($request);
         $delta = (int) $request->input('delta', 1);
         $newStock = max(0, $book->stock + $delta);
 

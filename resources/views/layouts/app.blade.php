@@ -157,19 +157,47 @@
                         </div>
                     </a>
 
-                    <!-- 2. Manajemen Buku -->
+                    <!-- 2. Katalog Koleksi / Manajemen Buku -->
                     <a href="{{ route('books.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('books.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
                             <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('books.*') ? 'text-white' : 'text-[#6f7a6e]' }}">menu_book</span>
-                            <span>Manajemen Buku</span>
+                            <span>{{ auth()->check() && auth()->user()->isLibrarian() ? 'Manajemen Buku' : 'Katalog Buku' }}</span>
                         </div>
                         <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold {{ request()->routeIs('books.*') ? 'bg-white/20 text-white' : 'bg-[#eff4ff] text-[#6f7a6e]' }}">
                             {{ \App\Models\Book::count() }}
                         </span>
                     </a>
 
-                    <!-- 3. Kategori -->
+                    <!-- 3. E-Book & Koleksi Digital -->
+                    <a href="{{ route('ebooks.index') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('ebooks.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('ebooks.*') ? 'text-white' : 'text-[#6f7a6e]' }}">auto_stories</span>
+                            <span>E-Book Digital</span>
+                        </div>
+                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-emerald-100 text-[#00652c]">
+                            Digital
+                        </span>
+                    </a>
+
+                    @auth
+                    <!-- 4. Layanan Peminjaman Buku -->
+                    <a href="{{ route('loans.index') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('loans.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('loans.*') ? 'text-white' : 'text-[#6f7a6e]' }}">assignment</span>
+                            <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Pinjaman' : 'Peminjaman Saya' }}</span>
+                        </div>
+                        @if(auth()->user()->isMember())
+                            <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold {{ request()->routeIs('loans.*') ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">
+                                {{ auth()->user()->loans()->where('status', 'dipinjam')->count() }}
+                            </span>
+                        @endif
+                    </a>
+                    @endauth
+
+                    <!-- 5. Kategori DDC -->
                     <a href="{{ route('categories.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('categories.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
@@ -181,7 +209,8 @@
                         </span>
                     </a>
 
-                    <!-- 4. Laporan Inventaris -->
+                    @if(auth()->check() && auth()->user()->isLibrarian())
+                    <!-- 6. Laporan Inventaris (Khusus Pustakawan & Super Admin) -->
                     <a href="{{ route('inventory.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('inventory.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
@@ -190,19 +219,16 @@
                         </div>
                     </a>
 
-                    <!-- 5. Laravel & Eloquent Studio -->
+                    <!-- 7. Laravel & Eloquent Studio -->
                     <a href="{{ route('laravel-studio.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('laravel-studio.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
                             <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('laravel-studio.*') ? 'text-white' : 'text-[#6f7a6e]' }}">code_blocks</span>
-                            <span>Laravel &amp; Eloquent</span>
+                            <span>Eloquent Studio</span>
                         </div>
-                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-[#d3ffd5] text-[#00652c]">
-                            Blade
-                        </span>
                     </a>
 
-                    <!-- 6. Pengaturan -->
+                    <!-- 8. Pengaturan -->
                     <a href="{{ route('settings.index') }}"
                        class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('settings.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
                         <div class="flex items-center gap-2.5">
@@ -210,6 +236,53 @@
                             <span>Pengaturan</span>
                         </div>
                     </a>
+                    @endif
+
+                    @if(auth()->check() && auth()->user()->isSuperAdmin())
+                    <!-- 9. Manajemen Pengguna (Khusus Super Admin) -->
+                    <a href="{{ route('users.index') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('users.*') ? 'bg-purple-700 text-white font-semibold shadow-sm' : 'text-purple-900 bg-purple-50/70 hover:bg-purple-100 hover:text-purple-950' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('users.*') ? 'text-white' : 'text-purple-700' }}">manage_accounts</span>
+                            <span>Manajemen User</span>
+                        </div>
+                        <span class="px-1.5 py-0.5 text-[9px] rounded-full font-bold bg-purple-200 text-purple-900">
+                            Super Admin
+                        </span>
+                    </a>
+                    @endif
+
+                    @guest
+                    <!-- Masuk Pustakawan / Anggota -->
+                    <a href="{{ route('login') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('login') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('login') ? 'text-white' : 'text-[#6f7a6e]' }}">login</span>
+                            <span>Masuk Sistem</span>
+                        </div>
+                    </a>
+
+                    <!-- Daftar Akun Baru -->
+                    <a href="{{ route('register') }}"
+                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('register') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('register') ? 'text-white' : 'text-[#6f7a6e]' }}">person_add</span>
+                            <span>Daftar Akun Baru</span>
+                        </div>
+                    </a>
+                    @else
+                    <!-- Keluar Sistem -->
+                    <form method="POST" action="{{ route('logout') }}" class="w-full mt-2 pt-2 border-t border-slate-100">
+                        @csrf
+                        <button type="submit"
+                                class="w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-sm text-rose-700 hover:bg-rose-50 text-left">
+                            <div class="flex items-center gap-2.5">
+                                <span class="material-symbols-outlined text-[20px] text-rose-600">logout</span>
+                                <span>Keluar Sistem</span>
+                            </div>
+                        </button>
+                    </form>
+                    @endguest
                 </nav>
             </div>
 
@@ -261,58 +334,84 @@
                 </div>
 
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <!-- Blade App UI vs Laravel Studio Toggle -->
-                    <div class="hidden xl:flex items-center bg-[#eff4ff] p-1 rounded-xl border border-[#dee9fc]">
-                        <a href="{{ route('books.index') }}"
-                           class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all {{ !request()->routeIs('laravel-studio.*') ? 'bg-white text-[#00652c] shadow-sm' : 'text-[#6f7a6e] hover:text-[#121c2a]' }}">
-                            <span class="material-symbols-outlined text-[16px]">web</span>
-                            <span>Blade App UI</span>
-                        </a>
-                        <a href="{{ route('laravel-studio.index') }}"
-                           class="px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all {{ request()->routeIs('laravel-studio.*') ? 'bg-[#15803d] text-white shadow-sm' : 'text-[#6f7a6e] hover:text-[#121c2a]' }}">
-                            <span class="material-symbols-outlined text-[16px]">code</span>
-                            <span>Laravel Eloquent Source</span>
-                        </a>
-                    </div>
-
                     <!-- Global Search trigger button -->
                     <button type="button" onclick="openGlobalSearch()"
-                            class="flex items-center gap-2 px-3 py-1.5 bg-[#eff4ff] hover:bg-[#e6eeff] rounded-xl text-[#6f7a6e] hover:text-[#121c2a] transition-colors border border-[#dee9fc]">
+                            class="flex items-center gap-2 px-3 py-1.5 bg-[#eff4ff] hover:bg-[#e6eeff] rounded-xl text-[#6f7a6e] hover:text-[#121c2a] transition-colors border border-[#dee9fc] cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">search</span>
-                        <span class="text-xs hidden lg:inline">Cari judul, ISBN, rak...</span>
+                        <span class="text-xs hidden md:inline">Cari koleksi buku...</span>
                         <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold bg-white text-[#121c2a] rounded shadow-xs">
                             ⌘K
                         </kbd>
                     </button>
 
-                    <!-- MySQL .sql Dump Export -->
-                    <a href="{{ route('books.export.sql') }}"
-                       title="Download MySQL Dump (.sql)"
-                       class="flex items-center gap-1 px-2.5 py-1.5 bg-[#eff4ff] hover:bg-[#d9e3f6] text-[#00652c] rounded-xl text-xs font-semibold transition-colors border border-[#dee9fc]">
-                        <span class="material-symbols-outlined text-[18px]">database</span>
-                        <span class="hidden sm:inline">MySQL .sql</span>
-                    </a>
-
-                    <!-- CSV Export -->
-                    <a href="{{ route('books.export.csv') }}"
-                       title="Download Data Katalog (CSV)"
-                       class="flex items-center gap-1 px-2.5 py-1.5 bg-[#eff4ff] hover:bg-[#d9e3f6] text-[#00652c] rounded-xl text-xs font-semibold transition-colors border border-[#dee9fc]">
-                        <span class="material-symbols-outlined text-[18px]">file_download</span>
-                        <span class="hidden sm:inline">CSV</span>
-                    </a>
-
                     <div class="h-6 w-px bg-[#d9e3f6]"></div>
 
-                    <!-- User profile badge -->
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#15803d] to-[#00652c] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                            DP
-                        </div>
-                        <div class="hidden sm:flex flex-col text-left">
-                            <span class="text-xs font-semibold text-[#121c2a] leading-tight">Dimas Prakoso</span>
-                            <span class="text-[11px] text-[#6f7a6e] leading-tight">Head Librarian</span>
+                    <!-- User Profile / Auth State Badge -->
+                    @auth
+                    <div class="relative group">
+                        <button type="button" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#eff4ff] transition-colors focus:outline-none cursor-pointer">
+                            <div class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shadow-sm {{ auth()->user()->isSuperAdmin() ? 'bg-purple-700' : (auth()->user()->isLibrarian() ? 'bg-[#15803d]' : 'bg-slate-700') }}">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                            </div>
+                            <div class="hidden sm:flex flex-col text-left">
+                                <span class="text-xs font-semibold text-[#121c2a] leading-tight">{{ auth()->user()->name }}</span>
+                                <span class="text-[10px] font-bold leading-tight {{ auth()->user()->isSuperAdmin() ? 'text-purple-700' : (auth()->user()->isLibrarian() ? 'text-[#00652c]' : 'text-blue-700') }}">
+                                    {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isLibrarian() ? 'Pustakawan' : 'Anggota') }}
+                                </span>
+                            </div>
+                            <span class="material-symbols-outlined text-[16px] text-slate-400">expand_more</span>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 top-full mt-1 w-56 bg-white rounded-2xl shadow-xl border border-[#e6eeff] py-2 hidden group-hover:block hover:block z-50">
+                            <div class="px-3 py-2 border-b border-[#f1f5f9]">
+                                <span class="text-xs font-bold text-[#121c2a] block truncate">{{ auth()->user()->name }}</span>
+                                <span class="text-[11px] text-[#475569] block truncate font-mono">{{ auth()->user()->email }}</span>
+                                <span class="mt-1 inline-block px-2 py-0.5 rounded-md text-[9px] font-bold uppercase {{ auth()->user()->isSuperAdmin() ? 'bg-purple-100 text-purple-800' : (auth()->user()->isLibrarian() ? 'bg-emerald-100 text-[#00652c]' : 'bg-blue-100 text-blue-800') }}">
+                                    {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isLibrarian() ? 'Pustakawan' : 'Anggota / Pengunjung') }}
+                                </span>
+                            </div>
+
+                            @if(auth()->user()->isSuperAdmin())
+                            <a href="{{ route('users.index') }}" class="px-3 py-2 text-xs text-purple-800 hover:bg-purple-50 flex items-center gap-2 font-semibold transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
+                                <span>Manajemen Pengguna</span>
+                            </a>
+                            @endif
+
+                            <a href="{{ route('loans.index') }}" class="px-3 py-2 text-xs text-slate-700 hover:bg-[#eff4ff] flex items-center gap-2 font-medium transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">assignment</span>
+                                <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Peminjaman' : 'Buku Pinjaman Saya' }}</span>
+                            </a>
+
+                            <a href="{{ route('ebooks.index') }}" class="px-3 py-2 text-xs text-slate-700 hover:bg-[#eff4ff] flex items-center gap-2 font-medium transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">auto_stories</span>
+                                <span>Koleksi E-Book</span>
+                            </a>
+
+                            <div class="border-t border-[#f1f5f9] my-1"></div>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full px-3 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold transition-colors cursor-pointer">
+                                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                                    <span>Keluar (Logout)</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
+                    @else
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('login') }}" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#15803d] to-[#00652c] text-white text-xs font-semibold shadow-xs hover:shadow hover:from-[#16a34a] hover:to-[#007b36] transition-all">
+                            <span class="material-symbols-outlined text-[16px]">login</span>
+                            <span>Masuk</span>
+                        </a>
+                        <a href="{{ route('register') }}" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#00652c] bg-[#eff4ff] hover:bg-[#dee9fc] border border-[#dee9fc] transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">person_add</span>
+                            <span>Daftar</span>
+                        </a>
+                    </div>
+                    @endauth
                 </div>
             </header>
 
