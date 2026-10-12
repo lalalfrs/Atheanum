@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "node ./node_modules/vite/bin/vite.js build",
-        "dev": "node ./node_modules/vite/bin/vite.js"
+        "dev": "node ./node_modules/vite/bin/vite.js",
+        "tunnel": ".\\cloudflared.exe tunnel --url http://127.0.0.1:8000"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
