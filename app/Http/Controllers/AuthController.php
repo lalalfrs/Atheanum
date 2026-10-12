@@ -20,7 +20,7 @@ class AuthController extends Controller
     public function showLoginForm(): View|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('home');
         }
 
         return view('auth.login');
@@ -32,7 +32,7 @@ class AuthController extends Controller
     public function showRegisterForm(): View|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('home');
         }
 
         return view('auth.register');
@@ -47,7 +47,7 @@ class AuthController extends Controller
             'name' => $request->string('name')->trim(),
             'email' => $request->string('email')->trim()->lower(),
             'role' => 'member',
-            'password' => Hash::make($request->string('password')),
+            'password' => $request->string('password'),
         ]);
 
         // Masuk secara otomatis setelah pendaftaran akun baru
@@ -72,12 +72,12 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
-                'redirect_url' => route('dashboard'),
+                'redirect_url' => route('home'),
             ], 201);
         }
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Pendaftaran akun pustakawan berhasil. Selamat bertugas, '.$user->name.'!');
+        return redirect()->route('home')
+            ->with('success', 'Pendaftaran akun berhasil. Selamat datang, '.$user->name.'!');
     }
 
     /**
@@ -85,10 +85,23 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse|RedirectResponse
     {
-        $credentials = $request->only('email', 'password');
+        $email = strtolower(trim((string) $request->input('email')));
+        $password = (string) $request->input('password');
         $remember = $request->boolean('remember');
 
-        if (! Auth::attempt($credentials, $remember)) {
+        /** @var User|null $user */
+        $user = User::where('email', $email)->first();
+
+        $passwordMatches = false;
+        if ($user) {
+            if ($user->password === $password) {
+                $passwordMatches = true;
+            } elseif (is_string($user->password) && (str_starts_with($user->password, '$2y$') || str_starts_with($user->password, '$2a$') || str_starts_with($user->password, '$2b$'))) {
+                $passwordMatches = Hash::check($password, $user->password);
+            }
+        }
+
+        if (! $user || ! $passwordMatches) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Alamat surel atau kata sandi yang Anda masukkan tidak sesuai dengan catatan kami.',
@@ -102,8 +115,7 @@ class AuthController extends Controller
                 ->withInput($request->only('email', 'remember'));
         }
 
-        /** @var User $user */
-        $user = Auth::user();
+        Auth::login($user, $remember);
 
         // Terbitkan Personal Access Token menggunakan Laravel Sanctum
         $token = $user->createToken('athenaeum-session-token')->plainTextToken;
@@ -124,12 +136,12 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
-                'redirect_url' => route('dashboard'),
+                'redirect_url' => route('home'),
             ]);
         }
 
-        return redirect()->intended(route('dashboard'))
-            ->with('success', 'Autentikasi Sanctum berhasil. Selamat bertugas, '.$user->name.'!');
+        return redirect()->intended(route('home'))
+            ->with('success', 'Selamat datang kembali, '.$user->name.'!');
     }
 
     /**

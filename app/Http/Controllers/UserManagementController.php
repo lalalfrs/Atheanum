@@ -65,7 +65,7 @@ class UserManagementController extends Controller
         ]);
 
         // Lindungi akun Super Admin utama agar tidak terkunci
-        if ($user->email === 'librarian@athenaeum.test' && $validated['role'] !== 'superadmin') {
+        if (in_array(strtolower($user->email), User::SUPER_ADMIN_EMAILS, true) && $validated['role'] !== 'superadmin') {
             return back()->with('error', 'Akun Super Admin sistem tidak dapat diturunkan statusnya.');
         }
 

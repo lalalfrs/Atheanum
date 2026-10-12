@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,6 +19,20 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    /** Email yang selalu diperlakukan sebagai super admin. */
+    public const SUPER_ADMIN_EMAILS = [
+        'librarian@athenaeum.test',
+        'librarian@atheanum.test',
+    ];
+
+    /**
+     * Dapatkan representasi password pengguna (plaintext).
+     */
+    public function getDisplayPassword(): string
+    {
+        return $this->password ?? 'password';
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -27,7 +42,6 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
         ];
     }
 
@@ -44,10 +58,7 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        return $this->role === 'superadmin' || in_array(strtolower($this->email), [
-            'librarian@athenaeum.test',
-            'librarian@atheanum.test',
-        ]);
+        return $this->role === 'superadmin' || in_array(strtolower($this->email), self::SUPER_ADMIN_EMAILS, true);
     }
 
     /**
@@ -64,5 +75,18 @@ class User extends Authenticatable
     public function isMember(): bool
     {
         return ! $this->isLibrarian();
+    }
+
+    /**
+     * Pustakawan dan super admin, untuk direktori publik.
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeStaff(Builder $query): void
+    {
+        $query->where(function (Builder $inner): void {
+            $inner->whereIn('role', ['librarian', 'superadmin'])
+                ->orWhereIn('email', self::SUPER_ADMIN_EMAILS);
+        });
     }
 }

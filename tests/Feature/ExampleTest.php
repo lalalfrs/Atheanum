@@ -23,7 +23,6 @@ class ExampleTest extends TestCase
         $this->get('/categories')->assertStatus(200);
         $this->get('/inventory')->assertStatus(200);
         $this->get('/ebooks')->assertStatus(200);
-        $this->get('/laravel-studio')->assertStatus(200);
         $this->get('/settings')->assertStatus(200);
         $this->get('/export/csv')->assertStatus(200);
         $this->get('/export/sql')->assertStatus(200);

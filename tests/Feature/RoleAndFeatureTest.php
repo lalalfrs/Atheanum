@@ -27,7 +27,7 @@ class RoleAndFeatureTest extends TestCase
             'password_confirmation' => 'password123',
         ]);
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('home'));
 
         $user = User::where('email', 'budi.mahasiswa@athenaeum.test')->first();
         $this->assertNotNull($user);
@@ -219,5 +219,110 @@ class RoleAndFeatureTest extends TestCase
         $readerResponse->assertStatus(200);
         $readerResponse->assertSee($ebook->title);
         $readerResponse->assertSee('Akses Baca Mandiri Anggota');
+    }
+
+    public function test_overdue_book_return_calculates_daily_fine_automatically(): void
+    {
+        $member = User::where('role', 'member')->first();
+        $book = Book::first();
+
+        // Pinjaman dibuat 12 hari yang lalu, jatuh tempo 5 hari yang lalu (terlambat 5 hari)
+        $loan = Loan::create([
+            'user_id' => $member->id,
+            'book_id' => $book->id,
+            'borrowed_at' => now()->subDays(12)->toDateString(),
+            'due_date' => now()->subDays(5)->toDateString(),
+            'status' => 'dipinjam',
+        ]);
+
+        $response = $this->actingAs($member)->post("/loans/{$loan->id}/return");
+        $response->assertRedirect();
+
+        $freshLoan = $loan->fresh();
+        $this->assertEquals('dikembalikan', $freshLoan->status);
+        $this->assertEquals(5000, $freshLoan->fine_amount); // 5 hari * Rp 1.000
+        $this->assertFalse($freshLoan->fine_paid);
+    }
+
+    public function test_member_with_unpaid_fines_is_blocked_from_borrowing(): void
+    {
+        $member = User::where('role', 'member')->first();
+        $book1 = Book::first();
+        $book2 = Book::skip(1)->first();
+
+        // Buat pinjaman dengan denda belum dibayar
+        Loan::create([
+            'user_id' => $member->id,
+            'book_id' => $book1->id,
+            'borrowed_at' => now()->subDays(15)->toDateString(),
+            'due_date' => now()->subDays(8)->toDateString(),
+            'returned_at' => now()->toDateString(),
+            'status' => 'dikembalikan',
+            'fine_amount' => 8000,
+            'fine_paid' => false,
+        ]);
+
+        // Coba pinjam buku baru
+        $response = $this->actingAs($member)->post('/loans', [
+            'book_id' => $book2->id,
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseMissing('loans', [
+            'user_id' => $member->id,
+            'book_id' => $book2->id,
+            'status' => 'dipinjam',
+        ]);
+    }
+
+    public function test_librarian_can_mark_fine_as_paid(): void
+    {
+        $librarian = User::where('email', 'librarian@athenaeum.test')->first();
+        $member = User::where('role', 'member')->first();
+        $book = Book::first();
+
+        $loan = Loan::create([
+            'user_id' => $member->id,
+            'book_id' => $book->id,
+            'borrowed_at' => now()->subDays(10)->toDateString(),
+            'due_date' => now()->subDays(3)->toDateString(),
+            'returned_at' => now()->toDateString(),
+            'status' => 'dikembalikan',
+            'fine_amount' => 3000,
+            'fine_paid' => false,
+        ]);
+
+        $response = $this->actingAs($librarian)->post("/loans/{$loan->id}/pay-fine");
+        $response->assertRedirect();
+
+        $this->assertTrue($loan->fresh()->fine_paid);
+        $this->assertNotNull($loan->fresh()->fine_paid_at);
+    }
+
+    public function test_member_can_renew_active_loan_before_due_date(): void
+    {
+        $member = User::where('role', 'member')->first();
+        $book = Book::first();
+
+        $initialDueDate = now()->addDays(5)->toDateString();
+        $loan = Loan::create([
+            'user_id' => $member->id,
+            'book_id' => $book->id,
+            'borrowed_at' => now()->subDays(2)->toDateString(),
+            'due_date' => $initialDueDate,
+            'status' => 'dipinjam',
+            'renewed_count' => 0,
+        ]);
+
+        $response = $this->actingAs($member)->post("/loans/{$loan->id}/renew");
+        $response->assertRedirect();
+
+        $freshLoan = $loan->fresh();
+        $this->assertEquals(1, $freshLoan->renewed_count);
+        $this->assertEquals(now()->addDays(12)->toDateString(), $freshLoan->due_date->toDateString());
+
+        // Coba perpanjang lagi (maksimal 1x)
+        $secondResponse = $this->actingAs($member)->post("/loans/{$loan->id}/renew");
+        $secondResponse->assertSessionHas('error');
     }
 }

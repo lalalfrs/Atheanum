@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Athenaeum Library System - Laravel & Eloquent Catalog')</title>
+    <title>@yield('title', 'Book Library - Digital Catalog')</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 
     <!-- Material Symbols -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -21,20 +21,25 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#15803d',
-                        'primary-dark': '#00652c',
-                        'primary-light': '#eff4ff',
-                        'primary-border': '#dee9fc',
-                        surface: '#f8f9ff',
-                        'surface-card': '#ffffff',
-                        'text-main': '#121c2a',
-                        'text-muted': '#6f7a6e',
-                        border: '#e6eeff',
+                        cream: '#F5F0E8',
+                        'cream-dark': '#EDE7DB',
+                        'cream-light': '#FAF7F2',
+                        forest: '#1B3A2D',
+                        'forest-light': '#2A5440',
+                        coral: '#E8734A',
+                        'coral-light': '#F4A27A',
+                        'surface-grey': '#F0EEEB',
+                        'text-primary': '#1A1A1A',
+                        'text-secondary': '#6B6B6B',
+                        'text-muted': '#9B9B9B',
+                        'border-light': '#E8E5E0',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        headline: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
+                        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '2xl': '16px',
+                        '3xl': '24px',
                     }
                 }
             }
@@ -47,30 +52,20 @@
             vertical-align: middle;
         }
         /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4d0ca; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b0aba3; }
 
-        /* Sidebar collapse & drawer transitions */
+        /* Sidebar transitions */
         #appSidebar {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        #mainWrapper, #appHeader {
-            transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        #mainWrapper {
+            transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Desktop Collapse Behavior */
+        /* Desktop Collapse */
         @media (min-width: 1024px) {
             body.sidebar-collapsed #appSidebar {
                 transform: translateX(-100%);
@@ -78,12 +73,9 @@
             body.sidebar-collapsed #mainWrapper {
                 padding-left: 0 !important;
             }
-            body.sidebar-collapsed #appHeader {
-                left: 0 !important;
-            }
         }
 
-        /* Mobile Drawer Behavior */
+        /* Mobile Drawer */
         @media (max-width: 1023px) {
             #appSidebar {
                 transform: translateX(-100%);
@@ -94,399 +86,342 @@
             #mainWrapper {
                 padding-left: 0 !important;
             }
-            #appHeader {
-                left: 0 !important;
-            }
+        }
+
+        /* Decorative curve for cream area */
+        .cream-curve {
+            position: relative;
+        }
+        .cream-curve::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #F5F0E8;
+            border-radius: 0 0 50% 50% / 0 0 100% 100%;
         }
     </style>
     <script>
-        // Check saved sidebar preference before paint
-        if (window.innerWidth >= 1024 && localStorage.getItem('athenaeum_sidebar_collapsed') === 'true') {
+        if (window.innerWidth >= 1024 && localStorage.getItem('bl_sidebar_collapsed') === 'true') {
             document.documentElement.classList.add('sidebar-collapsed-pending');
         }
     </script>
 </head>
-<body class="bg-[#f8f9ff] text-[#121c2a] font-sans antialiased min-h-screen">
+<body class="bg-cream-light text-text-primary font-sans antialiased min-h-screen">
     <!-- Mobile Backdrop -->
     <div id="sidebarBackdrop" onclick="toggleSidebar(false)"
-         class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden hidden transition-opacity duration-300"></div>
+         class="fixed inset-0 bg-black/30 z-40 lg:hidden hidden transition-opacity duration-300"></div>
 
     <div class="min-h-screen flex">
         <!-- Sidebar Navigation -->
-        <aside id="appSidebar" class="fixed left-0 top-0 h-screen w-64 bg-white flex flex-col justify-between z-50 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-r border-[#e6eeff]">
-            <div class="flex flex-col">
-                <!-- Brand Header -->
-                <div class="h-16 px-4 flex items-center justify-between border-b border-[#f1f5f9]">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
-                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#15803d] to-[#00652c] flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-                            <span class="material-symbols-outlined text-[20px]">local_library</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="font-headline font-bold text-base text-[#121c2a] tracking-tight leading-none">
-                                Athenaeum
-                            </span>
-                            <span class="text-[10px] uppercase text-[#00652c] font-bold tracking-wider mt-0.5">
-                                Library System
-                            </span>
-                        </div>
-                    </a>
-
-                    <!-- Sidebar Hide / Collapse Button -->
-                    <button type="button" onclick="toggleSidebar()"
-                            title="Sembunyikan Sidebar (Ctrl+B)"
-                            class="w-8 h-8 rounded-lg text-[#6f7a6e] hover:text-[#121c2a] hover:bg-[#eff4ff] flex items-center justify-center transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">keyboard_double_arrow_left</span>
-                    </button>
-                </div>
-
-                <!-- Navigation Section Title -->
-                <div class="px-4 pt-4 pb-2">
-                    <span class="text-[11px] font-bold text-[#6f7a6e] uppercase tracking-wider px-1">
-                        Navigasi Katalog
-                    </span>
+        <aside id="appSidebar" class="fixed left-0 top-0 h-screen w-[260px] bg-white flex flex-col justify-between z-50 border-r border-border-light">
+            <div class="flex flex-col flex-1 overflow-y-auto">
+                <!-- Menu Label -->
+                <div class="px-6 pt-7 pb-3">
+                    <span class="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em]">Menu</span>
                 </div>
 
                 <!-- Nav Items -->
-                <nav class="flex flex-col gap-1 px-3">
-                    <!-- 1. Dashboard -->
+                <nav class="flex flex-col gap-0.5 px-4">
+                    <!-- Beranda Utama -->
+                    <a href="{{ route('home') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium text-text-secondary hover:bg-surface-grey hover:text-text-primary">
+                        <span class="material-symbols-outlined text-[22px] text-[#2373F4]">home</span>
+                        <span>Beranda Utama</span>
+                    </a>
+
+                    <!-- Dashboard -->
                     <a href="{{ route('dashboard') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('dashboard') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('dashboard') ? 'text-white' : 'text-[#6f7a6e]' }}">dashboard</span>
-                            <span>Dashboard</span>
-                        </div>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('dashboard') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('dashboard') ? 'text-coral' : 'text-text-muted' }}">space_dashboard</span>
+                        <span>Dashboard</span>
                     </a>
 
-                    <!-- 2. Katalog Koleksi / Manajemen Buku -->
+                    <!-- Katalog Buku -->
                     <a href="{{ route('books.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('books.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('books.*') ? 'text-white' : 'text-[#6f7a6e]' }}">menu_book</span>
-                            <span>{{ auth()->check() && auth()->user()->isLibrarian() ? 'Manajemen Buku' : 'Katalog Buku' }}</span>
-                        </div>
-                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold {{ request()->routeIs('books.*') ? 'bg-white/20 text-white' : 'bg-[#eff4ff] text-[#6f7a6e]' }}">
-                            {{ \App\Models\Book::count() }}
-                        </span>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('books.*') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('books.*') ? 'text-coral' : 'text-text-muted' }}">menu_book</span>
+                        <span>{{ auth()->check() && auth()->user()->isLibrarian() ? 'Manajemen Buku' : 'Katalog Buku' }}</span>
                     </a>
 
-                    <!-- 3. E-Book & Koleksi Digital -->
+                    <!-- E-Book Digital -->
                     <a href="{{ route('ebooks.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('ebooks.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('ebooks.*') ? 'text-white' : 'text-[#6f7a6e]' }}">auto_stories</span>
-                            <span>E-Book Digital</span>
-                        </div>
-                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold bg-emerald-100 text-[#00652c]">
-                            Digital
-                        </span>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('ebooks.*') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('ebooks.*') ? 'text-coral' : 'text-text-muted' }}">auto_stories</span>
+                        <span>E-Book Digital</span>
                     </a>
 
                     @auth
-                    <!-- 4. Layanan Peminjaman Buku -->
+                    <!-- Peminjaman -->
                     <a href="{{ route('loans.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('loans.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('loans.*') ? 'text-white' : 'text-[#6f7a6e]' }}">assignment</span>
-                            <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Pinjaman' : 'Peminjaman Saya' }}</span>
-                        </div>
-                        @if(auth()->user()->isMember())
-                            <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold {{ request()->routeIs('loans.*') ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800' }}">
-                                {{ auth()->user()->loans()->where('status', 'dipinjam')->count() }}
-                            </span>
-                        @endif
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('loans.*') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('loans.*') ? 'text-coral' : 'text-text-muted' }}">assignment</span>
+                        <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Pinjaman' : 'Peminjaman Saya' }}</span>
                     </a>
                     @endauth
 
-                    <!-- 5. Kategori DDC -->
+                    <!-- Separator -->
+                    <div class="my-2 border-t border-border-light"></div>
+
+                    <!-- Kategori DDC -->
                     <a href="{{ route('categories.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('categories.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('categories.*') ? 'text-white' : 'text-[#6f7a6e]' }}">category</span>
-                            <span>Kategori DDC</span>
-                        </div>
-                        <span class="px-1.5 py-0.5 text-[10px] rounded-full font-bold {{ request()->routeIs('categories.*') ? 'bg-white/20 text-white' : 'bg-[#eff4ff] text-[#6f7a6e]' }}">
-                            {{ \App\Models\Category::count() }}
-                        </span>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('categories.*') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('categories.*') ? 'text-coral' : 'text-text-muted' }}">category</span>
+                        <span>Kategori DDC</span>
                     </a>
 
                     @if(auth()->check() && auth()->user()->isLibrarian())
-                    <!-- 6. Laporan Inventaris (Khusus Pustakawan & Super Admin) -->
+                    <!-- Audit & Rak Fisik -->
                     <a href="{{ route('inventory.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('inventory.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('inventory.*') ? 'text-white' : 'text-[#6f7a6e]' }}">inventory_2</span>
-                            <span>Audit &amp; Rak Fisik</span>
-                        </div>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('inventory.*') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('inventory.*') ? 'text-coral' : 'text-text-muted' }}">inventory_2</span>
+                        <span>Audit &amp; Rak Fisik</span>
                     </a>
 
-                    <!-- 7. Laravel & Eloquent Studio -->
-                    <a href="{{ route('laravel-studio.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('laravel-studio.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('laravel-studio.*') ? 'text-white' : 'text-[#6f7a6e]' }}">code_blocks</span>
-                            <span>Eloquent Studio</span>
-                        </div>
-                    </a>
 
-                    <!-- 8. Pengaturan -->
+                    <!-- Separator -->
+                    <div class="my-2 border-t border-border-light"></div>
+
+                    <!-- Pengaturan -->
                     <a href="{{ route('settings.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('settings.*') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('settings.*') ? 'text-white' : 'text-[#6f7a6e]' }}">settings</span>
-                            <span>Pengaturan</span>
-                        </div>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('settings.*') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('settings.*') ? 'text-coral' : 'text-text-muted' }}">settings</span>
+                        <span>Pengaturan</span>
                     </a>
                     @endif
 
                     @if(auth()->check() && auth()->user()->isSuperAdmin())
-                    <!-- 9. Manajemen Pengguna (Khusus Super Admin) -->
+                    <!-- Manajemen Pengguna -->
                     <a href="{{ route('users.index') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('users.*') ? 'bg-purple-700 text-white font-semibold shadow-sm' : 'text-purple-900 bg-purple-50/70 hover:bg-purple-100 hover:text-purple-950' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('users.*') ? 'text-white' : 'text-purple-700' }}">manage_accounts</span>
-                            <span>Manajemen User</span>
-                        </div>
-                        <span class="px-1.5 py-0.5 text-[9px] rounded-full font-bold bg-purple-200 text-purple-900">
-                            Super Admin
-                        </span>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('users.*') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('users.*') ? 'text-coral' : 'text-text-muted' }}">manage_accounts</span>
+                        <span>Manajemen User</span>
                     </a>
                     @endif
 
                     @guest
-                    <!-- Masuk Pustakawan / Anggota -->
+                    <!-- Login -->
                     <a href="{{ route('login') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('login') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('login') ? 'text-white' : 'text-[#6f7a6e]' }}">login</span>
-                            <span>Masuk Sistem</span>
-                        </div>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('login') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('login') ? 'text-coral' : 'text-text-muted' }}">login</span>
+                        <span>Masuk Sistem</span>
                     </a>
 
-                    <!-- Daftar Akun Baru -->
+                    <!-- Register -->
                     <a href="{{ route('register') }}"
-                       class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-sm {{ request()->routeIs('register') ? 'bg-[#15803d] text-white font-semibold shadow-sm' : 'text-[#3f493f] hover:bg-[#eff4ff] hover:text-[#121c2a]' }}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[20px] {{ request()->routeIs('register') ? 'text-white' : 'text-[#6f7a6e]' }}">person_add</span>
-                            <span>Daftar Akun Baru</span>
-                        </div>
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium {{ request()->routeIs('register') ? 'text-coral font-semibold' : 'text-text-secondary hover:bg-surface-grey hover:text-text-primary' }}">
+                        <span class="material-symbols-outlined text-[22px] {{ request()->routeIs('register') ? 'text-coral' : 'text-text-muted' }}">person_add</span>
+                        <span>Daftar Akun Baru</span>
                     </a>
                     @else
-                    <!-- Keluar Sistem -->
-                    <form method="POST" action="{{ route('logout') }}" class="w-full mt-2 pt-2 border-t border-slate-100">
+                    <!-- Logout -->
+                    <form method="POST" action="{{ route('logout') }}" class="w-full mt-1 pt-2 border-t border-border-light">
                         @csrf
                         <button type="submit"
-                                class="w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-sm text-rose-700 hover:bg-rose-50 text-left">
-                            <div class="flex items-center gap-2.5">
-                                <span class="material-symbols-outlined text-[20px] text-rose-600">logout</span>
-                                <span>Keluar Sistem</span>
-                            </div>
+                                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-[14px] font-medium text-red-500 hover:bg-red-50 text-left cursor-pointer">
+                            <span class="material-symbols-outlined text-[22px] text-red-400">logout</span>
+                            <span>Keluar Sistem</span>
                         </button>
                     </form>
                     @endguest
                 </nav>
             </div>
 
-            <!-- System Info Footer Card -->
-            <div class="p-3 m-3 bg-[#eff4ff] rounded-xl border border-[#dee9fc]">
-                <div class="flex items-center justify-between mb-1">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-[#15803d] animate-pulse"></span>
-                        <span class="text-[11px] font-bold text-[#1f6c3a] uppercase tracking-wider">
-                            Laravel {{ app()->version() }}
-                        </span>
-                    </div>
-                    <span class="text-[11px] text-[#6f7a6e] font-mono">PHP {{ PHP_MAJOR_VERSION }}.{{ PHP_MINOR_VERSION }}</span>
+            <!-- Logo at bottom of sidebar -->
+            <div class="p-6 flex flex-col items-center gap-2">
+                <!-- Abstract logo shape -->
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#2373F4] to-[#1a5ec4] flex items-center justify-center shadow-sm">
+                    <span class="material-symbols-outlined text-white text-[20px]">local_library</span>
                 </div>
-                <div class="text-xs text-[#3f493f] font-medium">Eloquent ORM Engine</div>
-                <div class="mt-2 pt-2 border-t border-[#dee9fc] flex items-center justify-between text-[10px] text-[#6f7a6e]">
-                    <span class="flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[13px] text-[#00652c]">database</span>
-                        {{ config('database.default') }}
-                    </span>
-                    <span class="text-[#00652c] font-semibold">Terkoneksi</span>
-                </div>
+                <span class="text-[11px] font-bold text-text-secondary uppercase tracking-[0.2em]">Book Library</span>
             </div>
         </aside>
 
         <!-- Main Wrapper -->
-        <div id="mainWrapper" class="lg:pl-64 pl-0 flex flex-col flex-1 min-h-screen">
-            <!-- Sticky Top Header -->
-            <header id="appHeader" class="fixed top-0 lg:left-64 left-0 right-0 h-16 bg-white/95 backdrop-blur-xl z-40 border-b border-[#e6eeff] px-4 sm:px-8 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
-                <div class="flex items-center gap-3">
-                    <!-- Toggle Sidebar Button (Show / Hide) -->
-                    <button id="sidebarToggleBtn" type="button" onclick="toggleSidebar()"
-                            title="Tampilkan / Sembunyikan Sidebar (Ctrl+B)"
-                            aria-label="Toggle Sidebar"
-                            class="p-2 rounded-xl text-[#3f493f] hover:text-[#121c2a] hover:bg-[#eff4ff] border border-[#e6eeff] transition-all flex items-center justify-center">
-                        <span id="sidebarToggleIcon" class="material-symbols-outlined text-[20px]">menu_open</span>
-                    </button>
-
-                    <div class="flex items-center gap-1.5 text-[#3f493f] text-sm">
-                        <span class="font-semibold text-[#121c2a] hidden sm:inline">Athenaeum</span>
-                        <span class="material-symbols-outlined text-[16px] text-[#6f7a6e] hidden sm:inline">chevron_right</span>
-                        <span class="text-[#6f7a6e] font-medium text-xs sm:text-sm">@yield('page_category', 'Katalog Perpustakaan')</span>
+        <div id="mainWrapper" class="lg:pl-[260px] pl-0 flex flex-col flex-1 min-h-screen">
+            <!-- Main Content -->
+            <main class="w-full flex-1">
+                <!-- Cream Top Area with decorative curve -->
+                <div class="bg-cream pt-4 sm:pt-6 pb-10 sm:pb-14 px-4 sm:px-10 relative z-30">
+                    <!-- Decorative curve bottom -->
+                    <div class="absolute bottom-0 left-0 right-0 h-[30px] sm:h-[40px] overflow-hidden">
+                        <div class="w-full h-[60px] sm:h-[80px] bg-cream-light rounded-t-[50%]"></div>
                     </div>
-                    <div class="h-4 w-px bg-[#d9e3f6] hidden md:block"></div>
-                    <div class="hidden md:flex items-center gap-1.5 text-[#6f7a6e] text-xs font-medium">
-                        <span class="material-symbols-outlined text-[16px]">calendar_today</span>
-                        <span>{{ now()->translatedFormat('l, d F Y') }}</span>
+
+                    <!-- Top Bar: Page title + User profile -->
+                    <div class="flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <!-- Mobile sidebar toggle -->
+                            <button type="button" onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl text-text-secondary hover:bg-cream-dark transition-colors cursor-pointer" aria-label="Toggle Sidebar">
+                                <span class="material-symbols-outlined text-[22px]">menu</span>
+                            </button>
+                            <div class="lg:hidden flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-forest text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                                    <span class="material-symbols-outlined text-[18px]">local_library</span>
+                                </div>
+                                <span class="font-bold text-sm text-text-primary tracking-tight">Athenaeum</span>
+                            </div>
+                            <!-- Desktop sidebar toggle -->
+                            <button id="sidebarToggleBtn" type="button" onclick="toggleSidebar()"
+                                    title="Tampilkan / Sembunyikan Sidebar (Ctrl+B)"
+                                    aria-label="Toggle Sidebar"
+                                    class="hidden lg:flex p-2 rounded-xl text-text-secondary hover:bg-cream-dark transition-colors items-center justify-center cursor-pointer">
+                                <span id="sidebarToggleIcon" class="material-symbols-outlined text-[22px]">menu_open</span>
+                            </button>
+                        </div>
+
+                        <!-- User Profile -->
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            @auth
+                            <div class="relative group" id="userProfileDropdown">
+                                <button type="button" id="profileDropdownBtn" onclick="toggleProfileDropdown(event)" class="flex items-center gap-2 sm:gap-2.5 p-1 sm:p-1.5 rounded-xl hover:bg-cream-dark transition-colors focus:outline-none cursor-pointer">
+                                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-forest text-white flex items-center justify-center font-bold text-xs ring-2 ring-white/80 shadow-xs">
+                                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                    </div>
+                                    <div class="hidden sm:flex flex-col text-left">
+                                        <span class="text-sm font-semibold text-text-primary leading-tight">{{ auth()->user()->name }}</span>
+                                        <span class="text-[11px] text-text-muted leading-tight">
+                                            {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isLibrarian() ? 'Pustakawan' : 'Anggota') }}
+                                        </span>
+                                    </div>
+                                    <span class="material-symbols-outlined text-[16px] text-text-muted hidden sm:inline">expand_more</span>
+                                </button>
+
+                                <!-- Dropdown (z-50 inside z-30 header so it stays above the white card & discover section) -->
+                                <div id="profileDropdownMenu" class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-border-light py-2 hidden group-hover:block hover:block z-50">
+                                    <div class="px-3.5 py-2.5 border-b border-border-light">
+                                        <span class="text-xs font-bold text-text-primary block truncate">{{ auth()->user()->name }}</span>
+                                        <span class="text-[11px] text-text-muted block truncate">{{ auth()->user()->email }}</span>
+                                    </div>
+
+                                    @if(auth()->user()->isSuperAdmin())
+                                    <a href="{{ route('users.index') }}" class="px-3.5 py-2 text-xs text-text-secondary hover:bg-surface-grey flex items-center gap-2 font-medium transition-colors">
+                                        <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
+                                        <span>Manajemen Pengguna</span>
+                                    </a>
+                                    @endif
+
+                                    <a href="{{ route('loans.index') }}" class="px-3.5 py-2 text-xs text-text-secondary hover:bg-surface-grey flex items-center gap-2 font-medium transition-colors">
+                                        <span class="material-symbols-outlined text-[16px]">assignment</span>
+                                        <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Peminjaman' : 'Buku Pinjaman Saya' }}</span>
+                                    </a>
+
+                                    <a href="{{ route('ebooks.index') }}" class="px-3.5 py-2 text-xs text-text-secondary hover:bg-surface-grey flex items-center gap-2 font-medium transition-colors">
+                                        <span class="material-symbols-outlined text-[16px]">auto_stories</span>
+                                        <span>Koleksi E-Book</span>
+                                    </a>
+
+                                    <div class="border-t border-border-light my-1"></div>
+
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="w-full px-3.5 py-2 text-left text-xs text-red-500 hover:bg-red-50 flex items-center gap-2 font-semibold transition-colors cursor-pointer">
+                                            <span class="material-symbols-outlined text-[16px]">logout</span>
+                                            <span>Keluar (Logout)</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            @else
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('login') }}" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-forest hover:bg-forest-light text-white text-xs font-semibold transition-colors">
+                                    <span class="material-symbols-outlined text-[16px]">login</span>
+                                    <span>Masuk</span>
+                                </a>
+                                <a href="{{ route('register') }}" class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-forest bg-white hover:bg-surface-grey border border-border-light transition-colors">
+                                    <span class="material-symbols-outlined text-[16px]">person_add</span>
+                                    <span>Daftar</span>
+                                </a>
+                            </div>
+                            @endauth
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <!-- Global Search trigger button -->
-                    <button type="button" onclick="openGlobalSearch()"
-                            class="flex items-center gap-2 px-3 py-1.5 bg-[#eff4ff] hover:bg-[#e6eeff] rounded-xl text-[#6f7a6e] hover:text-[#121c2a] transition-colors border border-[#dee9fc] cursor-pointer">
-                        <span class="material-symbols-outlined text-[18px]">search</span>
-                        <span class="text-xs hidden md:inline">Cari koleksi buku...</span>
-                        <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold bg-white text-[#121c2a] rounded shadow-xs">
-                            ⌘K
-                        </kbd>
-                    </button>
+                <!-- White Content Panel -->
+                <div class="bg-cream-light">
+                    <div class="bg-white mx-2.5 sm:mx-8 rounded-2xl sm:rounded-3xl shadow-[0_2px_24px_rgba(0,0,0,0.04)] border border-border-light -mt-6 relative z-10 min-h-[calc(100vh-200px)]">
+                        <div class="p-4 sm:p-8 lg:p-10">
 
-                    <div class="h-6 w-px bg-[#d9e3f6]"></div>
-
-                    <!-- User Profile / Auth State Badge -->
-                    @auth
-                    <div class="relative group">
-                        <button type="button" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#eff4ff] transition-colors focus:outline-none cursor-pointer">
-                            <div class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-xs shadow-sm {{ auth()->user()->isSuperAdmin() ? 'bg-purple-700' : (auth()->user()->isLibrarian() ? 'bg-[#15803d]' : 'bg-slate-700') }}">
-                                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                            <!-- Flash Success -->
+                            @if(session('success'))
+                            <div id="toast-success" class="mb-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-2xl flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-forest text-white flex items-center justify-center flex-shrink-0">
+                                        <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-sm block">Berhasil:</span>
+                                        <span class="text-xs text-green-700">{{ session('success') }}</span>
+                                    </div>
+                                </div>
+                                <button onclick="document.getElementById('toast-success').remove()" type="button" class="text-green-600 hover:text-green-900 p-1">
+                                    <span class="material-symbols-outlined text-[18px]">close</span>
+                                </button>
                             </div>
-                            <div class="hidden sm:flex flex-col text-left">
-                                <span class="text-xs font-semibold text-[#121c2a] leading-tight">{{ auth()->user()->name }}</span>
-                                <span class="text-[10px] font-bold leading-tight {{ auth()->user()->isSuperAdmin() ? 'text-purple-700' : (auth()->user()->isLibrarian() ? 'text-[#00652c]' : 'text-blue-700') }}">
-                                    {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isLibrarian() ? 'Pustakawan' : 'Anggota') }}
-                                </span>
-                            </div>
-                            <span class="material-symbols-outlined text-[16px] text-slate-400">expand_more</span>
-                        </button>
-
-                        <!-- Dropdown Menu -->
-                        <div class="absolute right-0 top-full mt-1 w-56 bg-white rounded-2xl shadow-xl border border-[#e6eeff] py-2 hidden group-hover:block hover:block z-50">
-                            <div class="px-3 py-2 border-b border-[#f1f5f9]">
-                                <span class="text-xs font-bold text-[#121c2a] block truncate">{{ auth()->user()->name }}</span>
-                                <span class="text-[11px] text-[#475569] block truncate font-mono">{{ auth()->user()->email }}</span>
-                                <span class="mt-1 inline-block px-2 py-0.5 rounded-md text-[9px] font-bold uppercase {{ auth()->user()->isSuperAdmin() ? 'bg-purple-100 text-purple-800' : (auth()->user()->isLibrarian() ? 'bg-emerald-100 text-[#00652c]' : 'bg-blue-100 text-blue-800') }}">
-                                    {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : (auth()->user()->isLibrarian() ? 'Pustakawan' : 'Anggota / Pengunjung') }}
-                                </span>
-                            </div>
-
-                            @if(auth()->user()->isSuperAdmin())
-                            <a href="{{ route('users.index') }}" class="px-3 py-2 text-xs text-purple-800 hover:bg-purple-50 flex items-center gap-2 font-semibold transition-colors">
-                                <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
-                                <span>Manajemen Pengguna</span>
-                            </a>
                             @endif
 
-                            <a href="{{ route('loans.index') }}" class="px-3 py-2 text-xs text-slate-700 hover:bg-[#eff4ff] flex items-center gap-2 font-medium transition-colors">
-                                <span class="material-symbols-outlined text-[16px]">assignment</span>
-                                <span>{{ auth()->user()->isLibrarian() ? 'Sirkulasi Peminjaman' : 'Buku Pinjaman Saya' }}</span>
-                            </a>
-
-                            <a href="{{ route('ebooks.index') }}" class="px-3 py-2 text-xs text-slate-700 hover:bg-[#eff4ff] flex items-center gap-2 font-medium transition-colors">
-                                <span class="material-symbols-outlined text-[16px]">auto_stories</span>
-                                <span>Koleksi E-Book</span>
-                            </a>
-
-                            <div class="border-t border-[#f1f5f9] my-1"></div>
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full px-3 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold transition-colors cursor-pointer">
-                                    <span class="material-symbols-outlined text-[16px]">logout</span>
-                                    <span>Keluar (Logout)</span>
+                            <!-- Flash Error -->
+                            @if(session('error') || $errors->any())
+                            <div id="toast-error" class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-2xl flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center flex-shrink-0">
+                                        <span class="material-symbols-outlined text-[20px]">error</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold text-sm block">Terjadi Kesalahan:</span>
+                                        <ul class="text-xs text-red-700 list-disc list-inside">
+                                            @if(session('error'))
+                                                <li>{{ session('error') }}</li>
+                                            @endif
+                                            @foreach($errors->all() as $err)
+                                                <li>{{ $err }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                                <button onclick="document.getElementById('toast-error').remove()" type="button" class="text-red-600 hover:text-red-900 p-1">
+                                    <span class="material-symbols-outlined text-[18px]">close</span>
                                 </button>
-                            </form>
-                        </div>
-                    </div>
-                    @else
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('login') }}" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#15803d] to-[#00652c] text-white text-xs font-semibold shadow-xs hover:shadow hover:from-[#16a34a] hover:to-[#007b36] transition-all">
-                            <span class="material-symbols-outlined text-[16px]">login</span>
-                            <span>Masuk</span>
-                        </a>
-                        <a href="{{ route('register') }}" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#00652c] bg-[#eff4ff] hover:bg-[#dee9fc] border border-[#dee9fc] transition-colors">
-                            <span class="material-symbols-outlined text-[16px]">person_add</span>
-                            <span>Daftar</span>
-                        </a>
-                    </div>
-                    @endauth
-                </div>
-            </header>
+                            </div>
+                            @endif
 
-            <!-- Main Content Canvas -->
-            <main class="w-full pt-20 px-8 pb-12 bg-[#f8f9ff] flex-1">
-                <!-- Flash Success Notification Toast -->
-                @if(session('success'))
-                <div id="toast-success" class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center justify-between shadow-xs transition-all animate-in fade-in">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-[20px]">check_circle</span>
-                        </div>
-                        <div>
-                            <span class="font-bold text-sm block">Berhasil:</span>
-                            <span class="text-xs text-emerald-700">{{ session('success') }}</span>
+                            <!-- Page Content -->
+                            @yield('content')
+
                         </div>
                     </div>
-                    <button onclick="document.getElementById('toast-success').remove()" type="button" class="text-emerald-600 hover:text-emerald-900 p-1">
-                        <span class="material-symbols-outlined text-[18px]">close</span>
-                    </button>
-                </div>
-                @endif
 
-                <!-- Flash Error Notification Toast -->
-                @if(session('error') || $errors->any())
-                <div id="toast-error" class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl flex items-center justify-between shadow-xs transition-all animate-in fade-in">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center flex-shrink-0">
-                            <span class="material-symbols-outlined text-[20px]">error</span>
-                        </div>
-                        <div>
-                            <span class="font-bold text-sm block">Terjadi Kesalahan:</span>
-                            <ul class="text-xs text-red-700 list-disc list-inside">
-                                @if(session('error'))
-                                    <li>{{ session('error') }}</li>
-                                @endif
-                                @foreach($errors->all() as $err)
-                                    <li>{{ $err }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                    <button onclick="document.getElementById('toast-error').remove()" type="button" class="text-red-600 hover:text-red-900 p-1">
-                        <span class="material-symbols-outlined text-[18px]">close</span>
-                    </button>
+                    <!-- Footer spacing -->
+                    <div class="h-10"></div>
                 </div>
-                @endif
-
-                <!-- Page Injected Content -->
-                @yield('content')
             </main>
         </div>
     </div>
 
-    <!-- Global Delete Confirmation Modal -->
-    <div id="globalDeleteModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100 flex flex-col gap-4">
+    <!-- Global Delete Modal -->
+    <div id="globalDeleteModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl border border-border-light flex flex-col gap-4">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0">
+                <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center flex-shrink-0">
                     <span class="material-symbols-outlined text-[26px]">delete_forever</span>
                 </div>
                 <div>
-                    <h3 class="font-headline font-bold text-lg text-gray-900">Konfirmasi Hapus Buku</h3>
-                    <p class="text-xs text-gray-500">Tindakan ini permanen dan akan menghapus data buku dari database katalog.</p>
+                    <h3 class="font-bold text-lg text-text-primary">Konfirmasi Hapus Buku</h3>
+                    <p class="text-xs text-text-muted">Tindakan ini permanen dan akan menghapus data buku dari database katalog.</p>
                 </div>
             </div>
 
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs text-gray-700">
+            <div class="bg-surface-grey p-3 rounded-xl text-xs text-text-secondary">
                 Apakah Anda yakin ingin menghapus buku <strong id="deleteBookTitle"></strong>?
             </div>
 
             <form id="globalDeleteForm" method="POST" action="" class="flex items-center justify-end gap-2 pt-2">
                 @csrf
                 @method('DELETE')
-                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors">
+                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-text-secondary hover:bg-surface-grey transition-colors">
                     Batal
                 </button>
                 <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm transition-colors flex items-center gap-1.5">
@@ -497,21 +432,21 @@
         </div>
     </div>
 
-    <!-- Global Detail Modal (AJAX Loaded) -->
-    <div id="globalDetailModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-gray-100 flex flex-col max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+    <!-- Global Detail Modal -->
+    <div id="globalDetailModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-xl border border-border-light flex flex-col max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-border-light mb-4">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-emerald-700 text-[22px]">book_2</span>
-                    <h3 class="font-headline font-bold text-lg text-gray-900">Detail Eksemplar Koleksi</h3>
+                    <span class="material-symbols-outlined text-forest text-[22px]">book_2</span>
+                    <h3 class="font-bold text-lg text-text-primary">Detail Eksemplar Koleksi</h3>
                 </div>
-                <button type="button" onclick="closeDetailModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100">
+                <button type="button" onclick="closeDetailModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-grey">
                     <span class="material-symbols-outlined text-[20px]">close</span>
                 </button>
             </div>
 
             <div id="detailModalBody" class="flex flex-col gap-4">
-                <div class="flex items-center justify-center py-12 text-gray-400">
+                <div class="flex items-center justify-center py-12 text-text-muted">
                     <span class="material-symbols-outlined text-3xl animate-spin">sync</span>
                     <span class="ml-2 text-sm">Memuat informasi buku dari database...</span>
                 </div>
@@ -519,33 +454,32 @@
         </div>
     </div>
 
-    <!-- Global Search Modal (Ctrl+K) -->
-    <div id="globalSearchModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs flex items-start justify-center pt-20 p-4">
-        <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-gray-100 overflow-hidden">
-            <div class="p-4 border-b border-gray-100 flex items-center gap-3">
-                <span class="material-symbols-outlined text-gray-400 text-[22px]">search</span>
+    <!-- Global Search Modal -->
+    <div id="globalSearchModal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-start justify-center pt-20 p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-border-light overflow-hidden">
+            <div class="p-4 border-b border-border-light flex items-center gap-3">
+                <span class="material-symbols-outlined text-text-muted text-[22px]">search</span>
                 <input type="text" id="globalSearchInput" placeholder="Cari judul, ISBN, penulis, atau rak... (tekan ESC untuk menutup)"
-                       class="w-full text-sm outline-none bg-transparent text-gray-900 placeholder:text-gray-400"
+                       class="w-full text-sm outline-none bg-transparent text-text-primary placeholder:text-text-muted"
                        onkeyup="if(event.key === 'Enter') executeGlobalSearch()">
-                <button type="button" onclick="closeGlobalSearch()" class="text-gray-400 hover:text-gray-600 text-xs px-2 py-1 rounded bg-gray-100">
+                <button type="button" onclick="closeGlobalSearch()" class="text-text-muted hover:text-text-secondary text-xs px-2 py-1 rounded bg-surface-grey">
                     ESC
                 </button>
             </div>
-            <div class="p-3 bg-gray-50 text-[11px] text-gray-500 flex items-center justify-between">
-                <span>Tekan <strong class="text-gray-700">Enter</strong> untuk langsung menuju halaman hasil katalog.</span>
-                <button type="button" onclick="executeGlobalSearch()" class="text-emerald-700 font-semibold hover:underline">
-                    Cari di Katalog →
+            <div class="p-3 bg-surface-grey text-[11px] text-text-muted flex items-center justify-between">
+                <span>Tekan <strong class="text-text-primary">Enter</strong> untuk langsung menuju halaman hasil katalog.</span>
+                <button type="button" onclick="executeGlobalSearch()" class="text-forest font-semibold hover:underline">
+                    Cari di Katalog
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Global JavaScript Helper Functions -->
+    <!-- JavaScript -->
     <script>
-        // Sidebar Toggle & Persistence Logic
         function initSidebarState() {
             const isDesktop = window.innerWidth >= 1024;
-            const savedCollapsed = localStorage.getItem('athenaeum_sidebar_collapsed') === 'true';
+            const savedCollapsed = localStorage.getItem('bl_sidebar_collapsed') === 'true';
             const toggleIcon = document.getElementById('sidebarToggleIcon');
 
             if (isDesktop && savedCollapsed) {
@@ -555,7 +489,6 @@
                 document.body.classList.remove('sidebar-collapsed');
                 if (toggleIcon) toggleIcon.textContent = 'menu_open';
             } else {
-                // On mobile, start closed
                 document.body.classList.remove('sidebar-mobile-open');
                 if (toggleIcon) toggleIcon.textContent = 'menu';
             }
@@ -567,21 +500,19 @@
             const backdrop = document.getElementById('sidebarBackdrop');
 
             if (isDesktop) {
-                // Desktop collapse / pull out
                 const isCurrentlyCollapsed = document.body.classList.contains('sidebar-collapsed');
                 const willCollapse = forceState !== undefined ? forceState : !isCurrentlyCollapsed;
 
                 if (willCollapse) {
                     document.body.classList.add('sidebar-collapsed');
-                    localStorage.setItem('athenaeum_sidebar_collapsed', 'true');
+                    localStorage.setItem('bl_sidebar_collapsed', 'true');
                     if (toggleIcon) toggleIcon.textContent = 'menu';
                 } else {
                     document.body.classList.remove('sidebar-collapsed');
-                    localStorage.setItem('athenaeum_sidebar_collapsed', 'false');
+                    localStorage.setItem('bl_sidebar_collapsed', 'false');
                     if (toggleIcon) toggleIcon.textContent = 'menu_open';
                 }
             } else {
-                // Mobile slide drawer
                 const isOpen = document.body.classList.contains('sidebar-mobile-open');
                 const willOpen = forceState !== undefined ? forceState : !isOpen;
 
@@ -597,7 +528,6 @@
             }
         }
 
-        // Initialize state on page load and window resize
         document.addEventListener('DOMContentLoaded', initSidebarState);
         window.addEventListener('resize', function() {
             const isDesktop = window.innerWidth >= 1024;
@@ -609,7 +539,6 @@
             }
         });
 
-        // Keyboard Shortcut ⌘K / Ctrl+K and ⌘B / Ctrl+B
         document.addEventListener('keydown', function(e) {
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
@@ -623,9 +552,27 @@
                 closeGlobalSearch();
                 closeDeleteModal();
                 closeDetailModal();
+                const menu = document.getElementById('profileDropdownMenu');
+                if (menu) menu.classList.add('hidden');
                 if (window.innerWidth < 1024) {
                     toggleSidebar(false);
                 }
+            }
+        });
+
+        function toggleProfileDropdown(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('profileDropdownMenu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const profileDropdown = document.getElementById('userProfileDropdown');
+            const menu = document.getElementById('profileDropdownMenu');
+            if (menu && profileDropdown && !profileDropdown.contains(e.target)) {
+                menu.classList.add('hidden');
             }
         });
 
@@ -661,7 +608,7 @@
             const body = document.getElementById('detailModalBody');
             modal.classList.remove('hidden');
             body.innerHTML = `
-                <div class="flex items-center justify-center py-12 text-gray-400">
+                <div class="flex items-center justify-center py-12 text-text-muted">
                     <span class="material-symbols-outlined text-3xl animate-spin">sync</span>
                     <span class="ml-2 text-sm">Memuat informasi buku...</span>
                 </div>
@@ -675,68 +622,68 @@
                 const book = data.book;
                 const coverUrl = data.cover_url || book.cover_image;
                 const statusBadge = book.status === 'Tersedia'
-                    ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Tersedia</span>'
+                    ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800">Tersedia</span>'
                     : (book.status === 'Stok Kritis'
                         ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Stok Kritis</span>'
-                        : '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Habis</span>');
+                        : '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800">Habis</span>');
 
                 body.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="flex flex-col items-center">
-                            <img src="${coverUrl}" alt="${book.title}" class="w-full max-w-[200px] h-64 object-cover rounded-xl shadow-md border border-gray-100">
+                            <img src="${coverUrl}" alt="${book.title}" class="w-full max-w-[150px] sm:max-w-[200px] h-48 sm:h-64 object-cover rounded-xl sm:rounded-2xl shadow-md border border-border-light">
                             <div class="mt-3 text-center">
-                                <span class="text-[11px] text-gray-500 font-mono block">${book.isbn}</span>
+                                <span class="text-[11px] text-text-muted font-mono block">${book.isbn}</span>
                                 <div class="mt-1">${statusBadge}</div>
                             </div>
                         </div>
                         <div class="md:col-span-2 flex flex-col justify-between">
                             <div>
-                                <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">${book.category}</span>
-                                <h2 class="font-headline font-bold text-xl text-gray-900 mt-1">${book.title}</h2>
-                                ${book.subtitle ? `<p class="text-xs text-gray-500 italic mt-0.5">${book.subtitle}</p>` : ''}
-                                
+                                <span class="text-xs font-bold text-forest uppercase tracking-wider">${book.category}</span>
+                                <h2 class="font-bold text-xl text-text-primary mt-1">${book.title}</h2>
+                                ${book.subtitle ? `<p class="text-xs text-text-muted italic mt-0.5">${book.subtitle}</p>` : ''}
+
                                 <div class="grid grid-cols-2 gap-3 mt-4 text-xs">
-                                    <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                                        <span class="text-gray-400 block text-[10px] uppercase font-bold">Penulis</span>
-                                        <strong class="text-gray-800">${book.author}</strong>
+                                    <div class="bg-surface-grey p-2.5 rounded-xl">
+                                        <span class="text-text-muted block text-[10px] uppercase font-bold">Penulis</span>
+                                        <strong class="text-text-primary">${book.author}</strong>
                                     </div>
-                                    <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                                        <span class="text-gray-400 block text-[10px] uppercase font-bold">Penerbit</span>
-                                        <strong class="text-gray-800">${book.publisher} (${book.year})</strong>
+                                    <div class="bg-surface-grey p-2.5 rounded-xl">
+                                        <span class="text-text-muted block text-[10px] uppercase font-bold">Penerbit</span>
+                                        <strong class="text-text-primary">${book.publisher} (${book.year})</strong>
                                     </div>
-                                    <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                                        <span class="text-gray-400 block text-[10px] uppercase font-bold">Lokasi Rak</span>
-                                        <strong class="text-gray-800">${book.shelf_location}</strong>
+                                    <div class="bg-surface-grey p-2.5 rounded-xl">
+                                        <span class="text-text-muted block text-[10px] uppercase font-bold">Lokasi Rak</span>
+                                        <strong class="text-text-primary">${book.shelf_location}</strong>
                                     </div>
-                                    <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                                        <span class="text-gray-400 block text-[10px] uppercase font-bold">Stok Fisik</span>
-                                        <strong class="text-emerald-700 text-sm">${book.stock}</strong> <span class="text-gray-500">/ ${book.total_copies} eksemplar</span>
+                                    <div class="bg-surface-grey p-2.5 rounded-xl">
+                                        <span class="text-text-muted block text-[10px] uppercase font-bold">Stok Fisik</span>
+                                        <strong class="text-forest text-sm">${book.stock}</strong> <span class="text-text-muted">/ ${book.total_copies} eksemplar</span>
                                     </div>
                                 </div>
 
                                 <div class="mt-4">
-                                    <span class="text-xs font-bold text-gray-700 block mb-1">Sinopsis & Ringkasan:</span>
-                                    <p class="text-xs text-gray-600 leading-relaxed bg-white p-3 rounded-lg border border-gray-100">
+                                    <span class="text-xs font-bold text-text-secondary block mb-1">Sinopsis:</span>
+                                    <p class="text-xs text-text-secondary leading-relaxed bg-surface-grey p-3 rounded-xl">
                                         ${book.description || 'Tidak ada deskripsi rinci untuk buku ini.'}
                                     </p>
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-between gap-3 pt-4 border-t border-gray-100 mt-4">
+                            <div class="flex items-center justify-between gap-3 pt-4 border-t border-border-light mt-4">
                                 <form method="POST" action="/books/${book.id}/stock" class="flex items-center gap-1.5">
                                     <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
-                                    <span class="text-xs font-medium text-gray-500 mr-1">Penyesuaian Stok:</span>
-                                    <button type="submit" name="delta" value="-1" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold flex items-center justify-center transition-colors">
+                                    <span class="text-xs font-medium text-text-muted mr-1">Penyesuaian Stok:</span>
+                                    <button type="submit" name="delta" value="-1" class="w-8 h-8 rounded-xl bg-surface-grey hover:bg-cream-dark text-text-primary font-bold flex items-center justify-center transition-colors">
                                         -
                                     </button>
-                                    <span class="px-2 text-xs font-bold text-gray-800">${book.stock}</span>
-                                    <button type="submit" name="delta" value="1" class="w-8 h-8 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold flex items-center justify-center transition-colors">
+                                    <span class="px-2 text-xs font-bold text-text-primary">${book.stock}</span>
+                                    <button type="submit" name="delta" value="1" class="w-8 h-8 rounded-xl bg-forest hover:bg-forest-light text-white font-bold flex items-center justify-center transition-colors">
                                         +
                                     </button>
                                 </form>
 
                                 <div class="flex items-center gap-2">
-                                    <a href="/books/${book.id}/edit" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold flex items-center gap-1 transition-colors">
+                                    <a href="/books/${book.id}/edit" class="px-3 py-1.5 rounded-xl bg-forest hover:bg-forest-light text-white text-xs font-semibold flex items-center gap-1 transition-colors">
                                         <span class="material-symbols-outlined text-[16px]">edit</span>
                                         <span>Edit Data</span>
                                     </a>

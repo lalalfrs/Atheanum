@@ -22,8 +22,8 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <div class="px-3.5 py-2 rounded-xl bg-purple-50 border border-purple-200 text-purple-900 text-xs flex items-center gap-2">
-                <span class="material-symbols-outlined text-[18px] text-purple-700">admin_panel_settings</span>
+            <div class="px-3.5 py-2 rounded-xl bg-[#2373F4]/10 border border-[#2373F4]/20 text-[#2373F4] text-xs flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px] text-[#2373F4]">admin_panel_settings</span>
                 <span>Super Admin: <strong class="font-bold">{{ $stats['superadmin'] }}</strong></span>
             </div>
             <div class="px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center gap-2">
@@ -83,6 +83,7 @@
                     <tr>
                         <th class="py-3.5 px-4">Pengguna</th>
                         <th class="py-3.5 px-4">Peran Saat Ini</th>
+                        <th class="py-3.5 px-4">Kata Sandi</th>
                         <th class="py-3.5 px-4">Pinjaman Aktif</th>
                         <th class="py-3.5 px-4">Terdaftar Sejak</th>
                         <th class="py-3.5 px-4 text-right">Ubah Hak Akses</th>
@@ -93,7 +94,7 @@
                     <tr class="hover:bg-[#fbfcfe] transition-colors">
                         <td class="py-3.5 px-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs text-white {{ $u->isSuperAdmin() ? 'bg-purple-700' : ($u->isLibrarian() ? 'bg-[#15803d]' : 'bg-slate-600') }}">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs text-white {{ $u->isSuperAdmin() ? 'bg-[#2373F4]' : ($u->isLibrarian() ? 'bg-[#15803d]' : 'bg-slate-600') }}">
                                     {{ strtoupper(substr($u->name, 0, 2)) }}
                                 </div>
                                 <div>
@@ -105,7 +106,7 @@
 
                         <td class="py-3.5 px-4">
                             @if($u->isSuperAdmin())
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200 inline-flex items-center gap-1">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#2373F4]/10 text-[#2373F4] border border-[#2373F4]/20 inline-flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[13px]">shield</span>
                                     <span>Super Admin</span>
                                 </span>
@@ -120,6 +121,25 @@
                                     <span>Anggota Mahasiswa</span>
                                 </span>
                             @endif
+                        </td>
+
+                        <!-- Kolom Kata Sandi (Plaintext untuk Super Admin) -->
+                        <td class="py-3.5 px-4">
+                            <div class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200/90 px-2.5 py-1.5 rounded-xl">
+                                <span id="pw-text-{{ $u->id }}" class="font-mono text-xs text-slate-700 tracking-wider">••••••••</span>
+                                <button type="button"
+                                        onclick="toggleUserPassword({{ $u->id }}, '{{ addslashes($u->password) }}')"
+                                        title="Tampilkan / Sembunyikan Kata Sandi"
+                                        class="p-1 rounded-lg text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition cursor-pointer flex items-center justify-center">
+                                    <span id="pw-icon-{{ $u->id }}" class="material-symbols-outlined text-[16px]">visibility</span>
+                                </button>
+                                <button type="button"
+                                        onclick="copyUserPassword('{{ addslashes($u->password) }}', this)"
+                                        title="Salin Kata Sandi"
+                                        class="p-1 rounded-lg text-slate-400 hover:text-blue-700 hover:bg-blue-50 transition cursor-pointer flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[16px]">content_copy</span>
+                                </button>
+                            </div>
                         </td>
 
                         <td class="py-3.5 px-4">
@@ -156,7 +176,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-10 text-center text-slate-400">
+                        <td colspan="6" class="py-10 text-center text-slate-400">
                             <span class="material-symbols-outlined text-3xl mb-1 block">search_off</span>
                             <span>Tidak ditemukan data pengguna yang cocok dengan kriteria pencarian.</span>
                         </td>
@@ -174,4 +194,32 @@
     </div>
 
 </div>
+
+<!-- Script Toggle & Salin Password Super Admin -->
+<script>
+    function toggleUserPassword(userId, actualPassword) {
+        const textEl = document.getElementById(`pw-text-${userId}`);
+        const iconEl = document.getElementById(`pw-icon-${userId}`);
+        
+        if (textEl.textContent === '••••••••') {
+            textEl.textContent = actualPassword;
+            textEl.classList.add('text-emerald-800', 'font-bold');
+            iconEl.textContent = 'visibility_off';
+        } else {
+            textEl.textContent = '••••••••';
+            textEl.classList.remove('text-emerald-800', 'font-bold');
+            iconEl.textContent = 'visibility';
+        }
+    }
+
+    function copyUserPassword(actualPassword, btn) {
+        navigator.clipboard.writeText(actualPassword).then(() => {
+            const originalColor = btn.className;
+            btn.classList.add('text-emerald-600', 'scale-110');
+            setTimeout(() => {
+                btn.className = originalColor;
+            }, 1200);
+        });
+    }
+</script>
 @endsection
