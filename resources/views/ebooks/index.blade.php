@@ -68,47 +68,48 @@
     </div>
 
     <!-- Grid Koleksi E-Book -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
         @forelse($ebooks as $book)
-        <div class="bg-white rounded-2xl border border-[#e6eeff] overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
+        <div class="bg-white rounded-xl sm:rounded-2xl border border-[#e6eeff] overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
             <div>
                 <!-- Cover Image & Badge Digital -->
-                <div class="relative h-56 bg-slate-100 overflow-hidden">
+                <div class="relative h-40 sm:h-56 bg-slate-100 overflow-hidden">
                     <img src="{{ $book->cover_url }}"
                          alt="{{ $book->title }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    <div class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-emerald-900/80 backdrop-blur-md text-emerald-200 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[14px]">auto_stories</span>
-                        <span>E-Book Digital</span>
+                    <div class="absolute top-2 right-2 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-emerald-900/80 backdrop-blur-md text-emerald-200 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[12px] sm:text-[14px]">auto_stories</span>
+                        <span class="hidden sm:inline">E-Book Digital</span>
+                        <span class="sm:hidden">Digital</span>
                     </div>
                 </div>
 
                 <!-- Info Buku -->
-                <div class="p-4">
-                    <span class="text-[10px] uppercase font-bold text-[#00652c] tracking-wider block mb-1">
+                <div class="p-2.5 sm:p-4">
+                    <span class="text-[9px] sm:text-[10px] uppercase font-bold text-[#00652c] tracking-wider block mb-0.5 sm:mb-1">
                         {{ $book->category }}
                     </span>
-                    <h3 class="font-headline font-bold text-base text-[#121c2a] line-clamp-1 group-hover:text-emerald-700 transition-colors">
+                    <h3 class="font-headline font-bold text-xs sm:text-base text-[#121c2a] line-clamp-1 group-hover:text-emerald-700 transition-colors" title="{{ $book->title }}">
                         {{ $book->title }}
                     </h3>
-                    <p class="text-xs text-[#6f7a6e] mt-0.5 line-clamp-1">
+                    <p class="text-[11px] sm:text-xs text-[#6f7a6e] mt-0.5 line-clamp-1">
                         {{ $book->author }} ({{ $book->year }})
                     </p>
-                    <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-1.5 sm:mt-2 line-clamp-2 leading-relaxed hidden sm:block">
                         {{ $book->description ?: 'Buku katalog klasik dan ilmiah digital siap dibaca secara daring.' }}
                     </p>
                 </div>
             </div>
 
             <!-- Footer Card & Tombol Baca -->
-            <div class="p-4 pt-0 border-t border-slate-100 mt-2 flex items-center justify-between gap-2">
-                <span class="text-[11px] text-slate-400 font-mono flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">article</span>
-                    <span>{{ $book->ebook_pages ?: 150 }} halaman</span>
+            <div class="p-2.5 sm:p-4 pt-0 border-t border-slate-100 mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 sm:gap-2">
+                <span class="text-[10px] sm:text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px] sm:text-[14px]">article</span>
+                    <span>{{ $book->ebook_pages ?: 150 }} hal</span>
                 </span>
                 <a href="{{ route('ebooks.read', $book) }}"
-                   class="px-3.5 py-2 rounded-xl bg-[#15803d] hover:bg-[#16a34a] text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all">
-                    <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                   class="w-full sm:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#15803d] hover:bg-[#16a34a] text-white text-[11px] sm:text-xs font-semibold shadow-xs flex items-center justify-center gap-1 sm:gap-1.5 transition-all">
+                    <span class="material-symbols-outlined text-[14px] sm:text-[16px]">menu_book</span>
                     <span>Baca E-Book</span>
                 </a>
             </div>

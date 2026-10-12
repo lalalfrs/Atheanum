@@ -35,8 +35,8 @@
                 </a>
             @else
                 <a href="{{ route('ebooks.index') }}"
-                   class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 rounded-xl text-xs font-semibold border border-indigo-200 shadow-xs transition-all flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[18px] text-indigo-600">devices</span>
+                   class="px-3.5 py-2 bg-[#2373F4]/10 hover:bg-[#2373F4]/20 text-[#2373F4] rounded-xl text-xs font-semibold border border-[#2373F4]/20 shadow-xs transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px] text-[#2373F4]">devices</span>
                     <span>Koleksi E-Book</span>
                 </a>
                 @auth
@@ -268,7 +268,7 @@
 
                                 @if($book->is_ebook)
                                     <a href="{{ route('ebooks.show', $book) }}"
-                                       class="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 transition-colors"
+                                       class="p-1.5 rounded-lg text-[#2373F4] hover:text-[#1a5ec4] hover:bg-[#2373F4]/10 transition-colors"
                                        title="Baca E-Book Online">
                                         <span class="material-symbols-outlined text-[18px]">auto_stories</span>
                                     </a>
@@ -311,45 +311,46 @@
     </div>
 
     <!-- Grid View (Hidden by default, toggled via JS) -->
-    <div id="gridViewContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mb-6">
+    <div id="gridViewContainer" class="hidden grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
         @foreach($books as $book)
-        <div class="bg-white rounded-xl border border-[#e6eeff] p-4 flex flex-col justify-between hover:shadow-md transition-shadow group">
+        <div class="bg-white rounded-xl border border-[#e6eeff] p-2.5 sm:p-4 flex flex-col justify-between hover:shadow-md transition-shadow group">
             <div>
-                <div class="relative overflow-hidden rounded-lg aspect-[3/4] mb-3 bg-gray-100">
+                <div class="relative overflow-hidden rounded-lg aspect-[3/4] max-h-[180px] sm:max-h-none mb-2 sm:mb-3 bg-gray-100">
                     <img src="{{ $book->cover_url }}" alt="{{ $book->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    <div class="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                    <div class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 flex flex-col gap-1 items-end">
                         @if($book->is_ebook)
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-600 text-white shadow-xs flex items-center gap-0.5">
-                                <span class="material-symbols-outlined text-[10px]">devices</span> E-Book
+                            <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-[#2373F4] text-white shadow-xs flex items-center gap-0.5">
+                                <span class="material-symbols-outlined text-[10px]">devices</span>
+                                <span class="hidden sm:inline">E-Book</span>
                             </span>
                         @endif
                         @if($book->status === 'Tersedia')
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-xs">Tersedia</span>
+                            <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-emerald-600 text-white shadow-xs">Tersedia</span>
                         @elseif($book->status === 'Stok Kritis')
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-white shadow-xs">Stok Kritis</span>
+                            <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-amber-500 text-white shadow-xs">Kritis</span>
                         @else
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-600 text-white shadow-xs">Habis</span>
+                            <span class="px-1.5 sm:px-2 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-rose-600 text-white shadow-xs">Habis</span>
                         @endif
                     </div>
                 </div>
-                <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block mb-0.5">{{ $book->category }}</span>
-                <h3 class="font-headline font-bold text-sm text-gray-900 line-clamp-1" title="{{ $book->title }}">{{ $book->title }}</h3>
-                <p class="text-xs text-gray-500 line-clamp-1 mb-2">{{ $book->author }} · {{ $book->year }}</p>
+                <span class="text-[9px] sm:text-[10px] font-bold text-emerald-700 uppercase tracking-wider block mb-0.5">{{ $book->category }}</span>
+                <h3 class="font-headline font-bold text-xs sm:text-sm text-gray-900 line-clamp-1" title="{{ $book->title }}">{{ $book->title }}</h3>
+                <p class="text-[11px] sm:text-xs text-gray-500 line-clamp-1 mb-1.5 sm:mb-2">{{ $book->author }} · {{ $book->year }}</p>
 
-                <div class="flex items-center justify-between text-xs text-gray-600 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                    <span class="flex items-center gap-1 text-[11px]">
-                        <span class="material-symbols-outlined text-[14px] text-gray-400">shelves</span>
+                <div class="flex items-center justify-between text-[10px] sm:text-xs text-gray-600 bg-gray-50 p-1.5 sm:p-2 rounded-lg border border-gray-100">
+                    <span class="flex items-center gap-1 text-[10px] sm:text-[11px] truncate max-w-[90px] sm:max-w-none">
+                        <span class="material-symbols-outlined text-[13px] sm:text-[14px] text-gray-400">shelves</span>
                         {{ $book->shelf_location }}
                     </span>
-                    <span class="font-bold text-emerald-700 text-xs">
+                    <span class="font-bold text-emerald-700 text-[10px] sm:text-xs flex-shrink-0">
                         Stok: {{ $book->stock }}
                     </span>
                 </div>
             </div>
 
-            <div class="flex items-center gap-1.5 pt-3 mt-3 border-t border-gray-100 flex-wrap">
-                <button type="button" onclick="openBookDetailModal({{ $book->id }})" class="flex-1 py-1.5 bg-[#eff4ff] hover:bg-emerald-700 hover:text-white text-emerald-800 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer">
-                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+            <div class="flex items-center gap-1 sm:gap-1.5 pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-gray-100 flex-wrap">
+                <button type="button" onclick="openBookDetailModal({{ $book->id }})" class="flex-1 py-1 sm:py-1.5 bg-[#eff4ff] hover:bg-emerald-700 hover:text-white text-emerald-800 text-[10px] sm:text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                    <span class="material-symbols-outlined text-[14px] sm:text-[16px]">visibility</span>
                     <span>Detail</span>
                 </button>
 
@@ -357,27 +358,27 @@
                     <form method="POST" action="{{ route('loans.store') }}" class="inline">
                         @csrf
                         <input type="hidden" name="book_id" value="{{ $book->id }}">
-                        <button type="submit" class="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-2xs" title="Pinjam Buku Ini">
-                            <span class="material-symbols-outlined text-[15px]">assignment_add</span>
-                            <span>Pinjam</span>
+                        <button type="submit" class="px-2 sm:px-2.5 py-1 sm:py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-[10px] sm:text-xs font-semibold flex items-center gap-0.5 sm:gap-1 transition-all cursor-pointer shadow-2xs" title="Pinjam Buku Ini">
+                            <span class="material-symbols-outlined text-[13px] sm:text-[15px]">assignment_add</span>
+                            <span class="hidden sm:inline">Pinjam</span>
                         </button>
                     </form>
                 @endif
 
                 @if($book->is_ebook)
                     <a href="{{ route('ebooks.show', $book) }}"
-                       class="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 transition-colors"
+                       class="p-1 sm:p-1.5 rounded-lg text-[#2373F4] hover:text-[#1a5ec4] hover:bg-[#2373F4]/10 transition-colors"
                        title="Baca E-Book Online">
-                        <span class="material-symbols-outlined text-[18px]">auto_stories</span>
+                        <span class="material-symbols-outlined text-[16px] sm:text-[18px]">auto_stories</span>
                     </a>
                 @endif
 
                 @if(auth()->check() && auth()->user()->isLibrarian())
-                    <a href="{{ route('books.edit', $book) }}" class="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors" title="Edit Buku">
-                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                    <a href="{{ route('books.edit', $book) }}" class="p-1 sm:p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors" title="Edit Buku">
+                        <span class="material-symbols-outlined text-[16px] sm:text-[18px]">edit</span>
                     </a>
-                    <button type="button" onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')" class="p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer" title="Hapus Buku">
-                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <button type="button" onclick="openDeleteModal('{{ route('books.destroy', $book) }}', '{{ addslashes($book->title) }}')" class="p-1 sm:p-1.5 rounded-lg text-gray-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer" title="Hapus Buku">
+                        <span class="material-symbols-outlined text-[16px] sm:text-[18px]">delete</span>
                     </button>
                 @endif
             </div>

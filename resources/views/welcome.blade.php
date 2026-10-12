@@ -77,9 +77,7 @@
                 <a href="{{ route('books.index') }}" class="hover:text-white transition-colors">Katalog Koleksi</a>
                 <a href="{{ route('categories.index') }}" class="hover:text-white transition-colors">Klasifikasi DDC</a>
                 <a href="{{ route('inventory.index') }}" class="hover:text-white transition-colors">Audit Rak</a>
-                <a href="{{ route('laravel-studio.index') }}" class="hover:text-white transition-colors">Eloquent Studio</a>
             </nav>
-
             <div class="flex items-center gap-3">
                 @guest
                 <a href="{{ route('login') }}"

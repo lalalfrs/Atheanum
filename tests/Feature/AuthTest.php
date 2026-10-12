@@ -25,14 +25,14 @@ class AuthTest extends TestCase
 
         $response = $this->actingAs($user)->get('/login');
 
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('home'));
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create([
             'email' => 'librarian@athenaeum.test',
-            'password' => bcrypt('password'),
+            'password' => 'password',
         ]);
 
         $response = $this->post('/login', [
@@ -41,7 +41,7 @@ class AuthTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('home'));
         $this->assertDatabaseHas('personal_access_tokens', [
             'tokenable_id' => $user->id,
             'name' => 'athenaeum-session-token',
@@ -52,7 +52,7 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'librarian@athenaeum.test',
-            'password' => bcrypt('password'),
+            'password' => 'password',
         ]);
 
         $response = $this->post('/login', [
@@ -68,7 +68,7 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'librarian@athenaeum.test',
-            'password' => bcrypt('password'),
+            'password' => 'password',
         ]);
 
         $response = $this->postJson('/api/login', [
@@ -113,7 +113,7 @@ class AuthTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard'));
+        $response->assertRedirect(route('home'));
 
         $this->assertDatabaseHas('users', [
             'email' => 'siti@athenaeum.test',

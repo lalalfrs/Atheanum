@@ -5,9 +5,12 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EbookController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\LaravelStudioController;
+use App\Http\Controllers\LibraryEventController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Autentikasi Laravel Sanctum & Sesi Pustakawan
+// Autentikasi
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -27,9 +30,18 @@ Route::middleware('guest')->group(function () {
 });
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Dashboard & Landing Showcase
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-Route::view('/welcome', 'welcome')->name('welcome');
+// Beranda & halaman informasi publik
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::controller(PageController::class)->group(function () {
+    Route::get('/tentang-kami', 'about')->name('pages.about');
+    Route::get('/kontak', 'contact')->name('pages.contact');
+    Route::get('/pustakawan', 'librarians')->name('pages.librarians');
+    Route::get('/bantuan', 'help')->name('pages.help');
+    Route::get('/cjs', 'cjs')->name('cjs.index');
+});
+
+// Dashboard katalog
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Books Resource & Catalog CRUD
 Route::get('/books', [BookController::class, 'index'])->name('books.index');
@@ -58,19 +70,33 @@ Route::get('/ebooks/{book}/read', [EbookController::class, 'read'])->name('ebook
 
 // Rute Terproteksi Pengguna Terautentikasi
 Route::middleware('auth')->group(function () {
-    // Layanan Peminjaman Buku Fisik
+    // Layanan Peminjaman Buku Fisik & Sirkulasi
     Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
     Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
     Route::post('/loans/{loan}/return', [LoanController::class, 'returnBook'])->name('loans.return');
+    Route::post('/loans/{loan}/renew', [LoanController::class, 'renew'])->name('loans.renew');
+    Route::post('/loans/{loan}/pay-fine', [LoanController::class, 'payFine'])->name('loans.payFine');
 
     // Manajemen Pengguna & Promosi Hak Akses (Khusus Super Admin)
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/role', [UserManagementController::class, 'updateRole'])->name('users.role');
+
+    // Pengelolaan berita & acara (khusus pustakawan, dicek di controller/request).
+    // Didaftarkan sebelum rute {slug} publik agar "tulis" dan "tambah" tidak dianggap slug.
+    Route::get('/berita/tulis', [NewsController::class, 'create'])->name('news.create');
+    Route::post('/berita', [NewsController::class, 'store'])->name('news.store');
+    Route::delete('/berita/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
+
+    Route::get('/acara/tambah', [LibraryEventController::class, 'create'])->name('events.create');
+    Route::post('/acara', [LibraryEventController::class, 'store'])->name('events.store');
+    Route::delete('/acara/{event}', [LibraryEventController::class, 'destroy'])->name('events.destroy');
 });
 
-// Laravel & Eloquent Architecture Studio
-Route::get('/laravel-studio', [LaravelStudioController::class, 'index'])->name('laravel-studio.index');
-Route::post('/laravel-studio/query', [LaravelStudioController::class, 'runQuery'])->name('laravel-studio.query');
+// Berita & acara (publik)
+Route::get('/berita', [NewsController::class, 'index'])->name('news.index');
+Route::get('/berita/{news}', [NewsController::class, 'show'])->name('news.show');
+Route::get('/acara', [LibraryEventController::class, 'index'])->name('events.index');
+Route::get('/acara/{event}', [LibraryEventController::class, 'show'])->name('events.show');
 
 // Settings & Diagnostic
 Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
