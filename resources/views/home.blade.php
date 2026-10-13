@@ -19,12 +19,12 @@
                 <span>Pusat Literasi &amp; Repositori Akademik</span>
             </div>
 
-            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-                Jelajahi Ilmu &amp; Koleksi Digital Tanpa Batas
+            <h1 class="font-headline text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                Pusat Literasi, Riset Ilmiah &amp; Koleksi Digital
             </h1>
 
-            <p class="text-sm sm:text-base text-emerald-100/80 max-w-2xl mx-auto leading-relaxed">
-                Temukan buku fisik, karya ilmiah, repositori universitas, jurnal riset, hingga ribuan halaman e-book interaktif dalam satu pencarian.
+            <p class="text-sm sm:text-base text-emerald-100/85 max-w-2xl mx-auto leading-relaxed">
+                Layanan perpustakaan terpadu untuk pencarian buku fisik, arsip karya ilmiah sivitas akademika, jurnal rujukan, serta koleksi e-book interaktif.
             </p>
 
             <!-- Direct OPAC Catalog Search Bar -->
@@ -52,7 +52,7 @@
                 </span>
                 <span class="flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[16px] text-[#2373F4]">auto_stories</span>
-                    <span>{{ $collection['ebooks'] }} Koleksi E-Book Digital</span>
+                    <span>{{ $collection['ebooks'] }} Koleksi E-Book</span>
                 </span>
                 <span class="flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[16px] text-amber-400">verified_user</span>
@@ -72,11 +72,11 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-[#2373F4]"></span>
                     <span class="text-xs uppercase font-bold tracking-wider text-[#2373F4]">Layanan Unggulan</span>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-text-primary mt-1">
-                    Komponen Layanan Perpustakaan
+                <h2 class="font-headline text-2xl sm:text-3xl font-extrabold text-text-primary mt-1">
+                    Layanan Utama Perpustakaan
                 </h2>
                 <p class="text-xs sm:text-sm text-text-secondary mt-1">
-                    Akses cepat ke katalog buku (OPAC), repositori karya ilmiah, e-journal, CJS per program studi, dan e-book.
+                    Akses cepat ke katalog buku (OPAC), repositori karya ilmiah, e-journal, CJS per program studi, dan koleksi e-book.
                 </p>
             </div>
         </div>
@@ -90,12 +90,12 @@
                     <div class="w-12 h-12 rounded-xl bg-forest/10 text-forest flex items-center justify-center mb-4 group-hover:bg-[#2373F4] group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-[26px]">manage_search</span>
                     </div>
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#2373F4] block mb-1">Katalog Online</span>
-                    <h3 class="font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#2373F4] block mb-1">Katalog Koleksi</span>
+                    <h3 class="font-headline font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
                         Katalog / OPAC
                     </h3>
                     <p class="text-xs text-text-secondary mt-1.5 leading-relaxed">
-                        Pencarian buku fisik, stok eksemplar di rak, informasi klasifikasi DDC, dan sitasi akademik.
+                        Pencarian lokasi buku fisik, status ketersediaan di rak, nomor panggil DDC, dan nomor ISBN.
                     </p>
                 </div>
                 <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-forest group-hover:text-[#2373F4]">
@@ -113,7 +113,7 @@
                             <span class="material-symbols-outlined text-[26px]">inventory_2</span>
                         </div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-text-muted block mb-1">Karya Ilmiah</span>
-                        <h3 class="font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
+                        <h3 class="font-headline font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
                             Repository
                         </h3>
                         <p class="text-xs text-text-secondary mt-1.5 leading-relaxed">
@@ -132,7 +132,7 @@
                             <span class="material-symbols-outlined text-[26px]">inventory_2</span>
                         </div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-text-muted block mb-1">Karya Ilmiah</span>
-                        <h3 class="font-bold text-base text-text-primary">Repository</h3>
+                        <h3 class="font-headline font-bold text-base text-text-primary">Repository</h3>
                         <p class="text-xs text-text-secondary mt-1.5 leading-relaxed">
                             Arsip digital skripsi, tesis, dan penelitian sivitas akademika institusi.
                         </p>
@@ -155,7 +155,7 @@
                             <span class="material-symbols-outlined text-[26px]">article</span>
                         </div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">Jurnal Riset</span>
-                        <h3 class="font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
+                        <h3 class="font-headline font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
                             E-Journal
                         </h3>
                         <p class="text-xs text-text-secondary mt-1.5 leading-relaxed">
@@ -174,7 +174,7 @@
                             <span class="material-symbols-outlined text-[26px]">article</span>
                         </div>
                         <span class="text-[10px] font-bold uppercase tracking-wider text-text-muted block mb-1">Jurnal Riset</span>
-                        <h3 class="font-bold text-base text-text-primary">E-Journal</h3>
+                        <h3 class="font-headline font-bold text-base text-text-primary">E-Journal</h3>
                         <p class="text-xs text-text-secondary mt-1.5 leading-relaxed">
                             Portal jurnal elektronik untuk sitasi dan tinjauan literatur ilmiah.
                         </p>
@@ -196,11 +196,11 @@
                         <span class="material-symbols-outlined text-[26px]">school</span>
                     </div>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 block mb-1">Program Studi</span>
-                    <h3 class="font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
+                    <h3 class="font-headline font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
                         CJS per Prodi
                     </h3>
                     <p class="text-xs text-text-secondary mt-1.5 leading-relaxed">
-                        Halaman pemilihan Cambridge / Journal System yang disesuaikan per program studi.
+                        Halaman pemilihan Cambridge Journal System yang disesuaikan per program studi.
                     </p>
                 </div>
                 <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-amber-700 group-hover:text-[#2373F4]">
@@ -217,7 +217,7 @@
                         <span class="material-symbols-outlined text-[26px]">auto_stories</span>
                     </div>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-[#2373F4] block mb-1">Baca Mandiri</span>
-                    <h3 class="font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
+                    <h3 class="font-headline font-bold text-base text-text-primary group-hover:text-[#2373F4] transition-colors">
                         E-Book Digital
                     </h3>
                     <p class="text-xs text-text-secondary mt-1.5 leading-relaxed">
@@ -242,7 +242,7 @@
             <div class="flex items-center justify-between border-b border-border-light pb-3">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[20px] text-[#2373F4]">newspaper</span>
-                    <h2 class="text-xl font-bold text-text-primary">Berita &amp; Informasi</h2>
+                    <h2 class="font-headline text-xl font-bold text-text-primary">Berita &amp; Informasi</h2>
                 </div>
                 <a href="{{ route('news.index') }}" class="text-xs font-semibold text-[#2373F4] hover:text-[#1A5EC4] flex items-center gap-1">
                     <span>Semua Berita</span>
@@ -263,7 +263,7 @@
                                 <span>{{ $item->author->name }}</span>
                             @endif
                         </div>
-                        <h3 class="font-bold text-sm sm:text-base text-text-primary group-hover:text-[#2373F4] transition-colors line-clamp-2">
+                        <h3 class="font-headline font-bold text-sm sm:text-base text-text-primary group-hover:text-[#2373F4] transition-colors line-clamp-2">
                             <a href="{{ route('news.show', $item) }}">{{ $item->title }}</a>
                         </h3>
                         <p class="text-xs text-text-secondary mt-1.5 line-clamp-2 leading-relaxed">
@@ -298,10 +298,10 @@
             <div class="flex items-center justify-between border-b border-border-light pb-3">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[20px] text-emerald-700">event</span>
-                    <h2 class="text-xl font-bold text-text-primary">Acara &amp; Agenda Literasi</h2>
+                    <h2 class="font-headline text-xl font-bold text-text-primary">Agenda &amp; Kegiatan Literasi</h2>
                 </div>
                 <a href="{{ route('events.index') }}" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
-                    <span>Semua Acara</span>
+                    <span>Semua Agenda</span>
                     <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
                 </a>
             </div>
@@ -320,14 +320,14 @@
                                 <span class="material-symbols-outlined text-[13px]">pin_drop</span>
                                 <span class="truncate">{{ $evt->location }}</span>
                             </span>
-                            <h3 class="font-bold text-sm sm:text-base text-text-primary group-hover:text-[#2373F4] transition-colors truncate mt-0.5">
+                            <h3 class="font-headline font-bold text-sm sm:text-base text-text-primary group-hover:text-[#2373F4] transition-colors truncate mt-0.5">
                                 <a href="{{ route('events.show', $evt) }}">{{ $evt->title }}</a>
                             </h3>
                             <p class="text-xs text-text-secondary mt-1 line-clamp-2 leading-relaxed">
                                 {{ Str::limit($evt->description, 100) }}
                             </p>
                             <a href="{{ route('events.show', $evt) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-[#2373F4] hover:underline mt-2">
-                                <span>Lihat Detail Event</span>
+                                <span>Lihat Detail Agenda</span>
                                 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                             </a>
                         </div>
@@ -335,7 +335,7 @@
                 @empty
                     <div class="bg-white p-8 rounded-2xl border border-border-light text-center space-y-2">
                         <span class="material-symbols-outlined text-4xl text-slate-300">event_busy</span>
-                        <p class="text-xs font-medium text-text-secondary">Tidak ada acara yang dijadwalkan dalam waktu dekat.</p>
+                        <p class="text-xs font-medium text-text-secondary">Tidak ada agenda yang dijadwalkan dalam waktu dekat.</p>
                         @auth
                             @if(auth()->user()->isLibrarian())
                                 <a href="{{ route('events.create') }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-forest text-white text-xs font-semibold mt-2">
@@ -361,8 +361,8 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                     <span class="text-xs uppercase font-bold tracking-wider text-[#15803d]">Statistik Kunjungan &amp; Koleksi</span>
                 </div>
-                <h2 class="text-2xl font-extrabold text-text-primary mt-1">
-                    Statistik Pengunjung &amp; Layanan Pemustaka
+                <h2 class="font-headline text-2xl font-extrabold text-text-primary mt-1">
+                    Statistik Pengunjung &amp; Koleksi
                 </h2>
             </div>
             <span class="text-xs text-text-muted">Data kunjungan dihitung unik per hari secara otomatis.</span>
@@ -416,7 +416,7 @@
                     <span class="text-xs font-medium">E-Book Digital</span>
                 </div>
                 <div class="text-2xl sm:text-3xl font-extrabold text-text-primary">{{ number_format($collection['ebooks']) }}</div>
-                <span class="text-[11px] text-text-muted">siap dibaca online</span>
+                <span class="text-[11px] text-text-muted">siap dibaca daring</span>
             </div>
         </div>
     </section>
@@ -431,8 +431,8 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
                     <span class="text-xs uppercase font-bold tracking-wider text-rose-600">Lokasi Fisik Perpustakaan</span>
                 </div>
-                <h2 class="text-2xl font-extrabold text-text-primary mt-1">
-                    Kunjungi Gedung Perpustakaan Kami
+                <h2 class="font-headline text-2xl font-extrabold text-text-primary mt-1">
+                    Kunjungi Perpustakaan
                 </h2>
             </div>
             <a href="{{ route('pages.contact') }}" class="text-xs font-semibold text-[#2373F4] hover:underline flex items-center gap-1">
@@ -445,12 +445,12 @@
             <!-- Lokasi Info Card -->
             <div class="bg-surface-grey/60 p-6 rounded-2xl border border-border-light flex flex-col justify-between space-y-4">
                 <div class="space-y-3">
-                    <h3 class="font-bold text-base text-text-primary flex items-center gap-2">
+                    <h3 class="font-headline font-bold text-base text-text-primary flex items-center gap-2">
                         <span class="material-symbols-outlined text-[#2373F4]">location_on</span>
                         <span>Alamat Perpustakaan</span>
                     </h3>
                     <p class="text-xs text-text-secondary leading-relaxed">
-                        {{ config('library.contact.address') ?: 'Gedung Perpustakaan Utama Lt. 1 & 2, Kampus Terpadu MNCU, Jl. Literasi Akademik No. 10.' }}
+                        {{ config('library.contact.address') ?: 'Gedung MNC University, Jl. Arteri Kedoya No. 9, Kebon Jeruk, Jakarta Barat, DKI Jakarta 11520' }}
                     </p>
 
                     <div class="pt-2 space-y-2 text-xs text-text-secondary">
@@ -460,11 +460,11 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-[16px] text-text-muted">call</span>
-                            <span>{{ config('library.contact.phone') ?: '+62 21 8901 2345' }}</span>
+                            <span>{{ config('library.contact.phone') ?: '+62 21 5366 6444' }}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-[16px] text-text-muted">mail</span>
-                            <span>{{ config('library.contact.email') ?: 'perpustakaan@mncu.ac.id' }}</span>
+                            <span>{{ config('library.contact.email') ?: 'perpustakaan@mncuniversity.ac.id' }}</span>
                         </div>
                     </div>
                 </div>

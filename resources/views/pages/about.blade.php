@@ -11,11 +11,11 @@
             <span class="w-2.5 h-2.5 rounded-full bg-[#2373F4]"></span>
             <span class="text-xs uppercase font-bold tracking-wider text-[#2373F4]">Profil &amp; Informasi</span>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
+        <h1 class="font-headline text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
             Tentang {{ config('library.name', 'Athenaeum Library') }}
         </h1>
         <p class="text-sm text-text-secondary max-w-2xl leading-relaxed">
-            Menjadi pusat keunggulan literasi, repositori riset ilmiah, dan ruang belajar terbuka yang adaptif terhadap era digital bagi seluruh civitas akademika dan masyarakat luas.
+            Menjadi pusat keunggulan literasi, repositori riset ilmiah, dan ruang belajar terbuka yang adaptif terhadap era digital bagi seluruh sivitas akademika dan masyarakat umum.
         </p>
     </div>
 
@@ -25,9 +25,9 @@
             <div class="w-12 h-12 rounded-2xl bg-forest text-white flex items-center justify-center font-bold">
                 <span class="material-symbols-outlined text-[24px]">visibility</span>
             </div>
-            <h2 class="text-xl font-bold text-text-primary">Visi Perpustakaan</h2>
+            <h2 class="font-headline text-xl font-bold text-text-primary">Visi Perpustakaan</h2>
             <p class="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                Mewujudkan perpustakaan rujukan berbasis teknologi mutakhir yang inklusif, menyediakan akses literasi ilmiah global, serta menumbuhkan ekosistem penelitian yang berintegritas tinggi.
+                Mewujudkan perpustakaan rujukan modern dan inklusif yang menyediakan akses literasi ilmiah terbuka, serta menumbuhkan ekosistem penelitian berintegritas.
             </p>
         </div>
 
@@ -35,11 +35,11 @@
             <div class="w-12 h-12 rounded-2xl bg-[#2373F4] text-white flex items-center justify-center font-bold">
                 <span class="material-symbols-outlined text-[24px]">flag</span>
             </div>
-            <h2 class="text-xl font-bold text-text-primary">Misi Utama</h2>
+            <h2 class="font-headline text-xl font-bold text-text-primary">Misi Utama</h2>
             <ul class="space-y-2.5 text-xs sm:text-sm text-text-secondary leading-relaxed">
                 <li class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
-                    <span>Mengelola koleksi fisik dan digital yang relevan, mutakhir, dan berstandar internasional.</span>
+                    <span>Mengelola koleksi fisik dan digital yang relevan, mutakhir, dan terkurasi dengan baik.</span>
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
@@ -58,7 +58,7 @@
         <div class="border-b border-border-light pb-4">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-[20px] text-amber-600">policy</span>
-                <h2 class="text-xl font-bold text-text-primary">Kebijakan Sirkulasi &amp; Peminjaman Resmi</h2>
+                <h2 class="font-headline text-xl font-bold text-text-primary">Kebijakan Sirkulasi &amp; Peminjaman Resmi</h2>
             </div>
             <p class="text-xs text-text-muted mt-1">
                 Aturan standar sirkulasi perpustakaan yang berlaku bagi seluruh anggota aktif.

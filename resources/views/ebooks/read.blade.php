@@ -25,7 +25,7 @@
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                        headline: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        headline: ['DM Sans', 'Inter', 'sans-serif'],
                         serif: ['Lora', 'Georgia', 'serif'],
                         mono: ['Fira Code', 'monospace'],
                     }

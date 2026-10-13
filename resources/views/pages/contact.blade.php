@@ -11,7 +11,7 @@
             <span class="w-2.5 h-2.5 rounded-full bg-[#2373F4]"></span>
             <span class="text-xs uppercase font-bold tracking-wider text-[#2373F4]">Hubungi Kami</span>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
+        <h1 class="font-headline text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight">
             Kontak Pengelola Perpustakaan
         </h1>
         <p class="text-sm text-text-secondary max-w-2xl leading-relaxed">
@@ -27,9 +27,9 @@
                 <div class="w-12 h-12 rounded-2xl bg-forest text-white flex items-center justify-center font-bold">
                     <span class="material-symbols-outlined text-[24px]">call</span>
                 </div>
-                <h2 class="text-lg font-bold text-text-primary">Telepon &amp; WhatsApp</h2>
+                <h2 class="font-headline text-lg font-bold text-text-primary">Telepon &amp; WhatsApp</h2>
                 <div class="space-y-1 text-xs sm:text-sm text-text-secondary">
-                    <p class="font-semibold text-text-primary">{{ $contact['phone'] ?: '+62 21 8901 2345' }}</p>
+                    <p class="font-semibold text-text-primary">{{ $contact['phone'] ?: '+62 21 5366 6444' }}</p>
                     <p class="text-xs text-text-muted">Layanan WhatsApp Sirkulasi: {{ $contact['whatsapp'] ?: '+62 812 3456 7890' }}</p>
                 </div>
             </div>
@@ -38,10 +38,10 @@
                 <div class="w-12 h-12 rounded-2xl bg-[#2373F4] text-white flex items-center justify-center font-bold">
                     <span class="material-symbols-outlined text-[24px]">mail</span>
                 </div>
-                <h2 class="text-lg font-bold text-text-primary">Surat Elektronik (Email)</h2>
+                <h2 class="font-headline text-lg font-bold text-text-primary">Surat Elektronik (Email)</h2>
                 <div class="space-y-1 text-xs sm:text-sm text-text-secondary">
-                    <a href="mailto:{{ $contact['email'] ?: 'perpustakaan@mncu.ac.id' }}" class="font-semibold text-[#2373F4] hover:underline block">
-                        {{ $contact['email'] ?: 'perpustakaan@mncu.ac.id' }}
+                    <a href="mailto:{{ $contact['email'] ?: 'perpustakaan@mncuniversity.ac.id' }}" class="font-semibold text-[#2373F4] hover:underline block">
+                        {{ $contact['email'] ?: 'perpustakaan@mncuniversity.ac.id' }}
                     </a>
                     <p class="text-xs text-text-muted">Respon maksimal 1x24 jam kerja.</p>
                 </div>
@@ -51,7 +51,7 @@
                 <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold">
                     <span class="material-symbols-outlined text-[24px]">schedule</span>
                 </div>
-                <h2 class="text-lg font-bold text-text-primary">Jam Layanan Fisik</h2>
+                <h2 class="font-headline text-lg font-bold text-text-primary">Jam Layanan Fisik</h2>
                 <div class="space-y-1 text-xs text-text-secondary">
                     <p><strong class="text-text-primary">Senin - Kamis:</strong> 08.00 - 16.30 WIB</p>
                     <p><strong class="text-text-primary">Jumat:</strong> 08.00 - 16.00 WIB (Istirahat 11.30 - 13.00)</p>
