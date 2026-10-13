@@ -169,11 +169,11 @@
     </header>
 
     <!-- Main Public Content -->
-    <main class="flex-1">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main class="flex-1 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
             @include('partials.flash')
+            @yield('content')
         </div>
-        @yield('content')
     </main>
 
     <!-- Public Footer -->

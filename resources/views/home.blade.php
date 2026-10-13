@@ -479,18 +479,15 @@
 
             <!-- Map Embed Container -->
             <div class="lg:col-span-2 rounded-2xl overflow-hidden border border-border-light h-72 sm:h-80 bg-slate-100 relative">
-                @php
-                    $encodedQuery = urlencode($mapQuery ?: 'Perpustakaan Nasional Republik Indonesia Jakarta');
-                @endphp
                 <iframe
-                    src="https://www.google.com/maps?q={{ $encodedQuery }}&output=embed"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7639.176983907385!2d106.76078576880916!3d-6.165786488848673!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f755f4008685%3A0xff5d1632dbcc3042!2sMNC%20University!5e0!3m2!1sen!2sid!4v1791854863659!5m2!1sen!2sid"
                     width="100%"
                     height="100%"
                     style="border:0;"
                     allowfullscreen=""
                     loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    title="Peta Lokasi Perpustakaan"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    title="Peta Lokasi MNC University"
                     class="w-full h-full">
                 </iframe>
             </div>
